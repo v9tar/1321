@@ -1,256 +1,205 @@
 --[[
-    سكربت D88 الإحترافي - النسخة الخفيفة
-    المميزات:
-    1. حجم مضغوط 40% أصغر من السابق
-    2. زر AFK مدمج
-    3. وضع توفير FPS (إخفاء العناصر)
-    4. تحسينات أداء عالية
-    5. دعم كافة الأجهزة
+  سكربت D88 المتميز - النسخة العربية
+  المميزات:
+  1. واجهة عربية 100% بتصميم مظلم
+  2. حجم مضغوط مع إمكانية التنقل
+  3. تحكم كامل في المابات
+  4. عرض أداء اللعبة (FPS/Ping)
+  5. نظام تبرعات مدمج
 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local MarketplaceService = game:GetService("MarketplaceService")
-local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
--- إعدادات الواجهة (مضغوطة 40%) --
-local GUI_SETTINGS = {
-    Size = UDim2.new(0, 200, 0, 270),
-    Position = UDim2.new(0.5, -100, 0.5, -135),
-    BackgroundTransparency = 0.1,
-    Color = Color3.fromRGB(20, 25, 35)
+-- النصوص العربية
+local ArabicText = {
+    MainTitle = "سكربت D88 المطور",
+    MapControl = "التحكم في المابات",
+    DonateTitle = "ادعم المطور",
+    Donate5 = "تبرع 5 ريال 💙",
+    Donate10 = "تبرع 10 ريال 💎",
+    CloseUI = "إغلاق القائمة ▲",
+    OpenUI = "فتح القائمة ▼",
+    Performance = "أداء اللعبة",
+    FPS = "معدل الإطارات: ",
+    Ping = "سرعة الاتصال: ",
+    Loading = "جاري التحميل..."
 }
 
--- النصوص العربية --
-local ARABIC_TEXTS = {
-    Title = "D88 الخفيف",
-    MapControl = "تحكم الخرائط",
-    DonateTitle = "دعم المطور",
-    Donate5 = "5 💎",
-    Donate10 = "10 💖",
-    CloseUI = "إغلاق ▲",
-    OpenUI = "فتح ▼",
-    FPS = "FPS: ",
-    Ping = "Ping: ",
-    AFK = "وضع AFK",
-    BoostFPS = "تعزيز FPS"
-}
-
--- إنشاء الواجهة الرئيسية --
-local D88UI = Instance.new("ScreenGui")
-D88UI.Name = "D88_Light"
-D88UI.ResetOnSpawn = false
-D88UI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-D88UI.Parent = game:GetService("CoreGui")
+-- إنشاء واجهة مظلمة صغيرة
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "D88_Arabic"
+Gui.Parent = game:GetService("CoreGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = GUI_SETTINGS.Size
-MainFrame.Position = GUI_SETTINGS.Position
-MainFrame.BackgroundColor3 = GUI_SETTINGS.Color
-MainFrame.BackgroundTransparency = GUI_SETTINGS.BackgroundTransparency
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.Parent = D88UI
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = Gui
+MainFrame.Size = UDim2.new(0, 280, 0, 350) -- حجم أصغر
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -175)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20) -- لون أغمق
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.Active = true
+MainFrame.Draggable = true
 
--- تحسينات الشكل --
+-- زوايا مدورة
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
+-- إطار الظل
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Thickness = 1
-UIStroke.Color = Color3.fromRGB(100, 150, 255)
+UIStroke.Color = Color3.fromRGB(50, 50, 80)
+UIStroke.Thickness = 2
 UIStroke.Parent = MainFrame
 
--- العناصر الرئيسية --
-local function CreateElement(type, props)
-    local element = Instance.new(type)
-    for prop, value in pairs(props) do
-        element[prop] = value
-    end
-    return element
+-- العناصر الرئيسية
+local Title = Instance.new("TextLabel")
+Title.Text = ArabicText.MainTitle
+Title.Size = UDim2.new(0, 250, 0, 40)
+Title.Position = UDim2.new(0.5, -125, 0, 5)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.BackgroundTransparency = 1
+Title.TextSize = 18
+Title.Parent = MainFrame
+
+-- زر التحكم في المابات (مصغر)
+local MapControlBtn = Instance.new("TextButton")
+MapControlBtn.Text = ArabicText.MapControl
+MapControlBtn.Size = UDim2.new(0, 240, 0, 45) -- حجم أصغر
+MapControlBtn.Position = UDim2.new(0.5, -120, 0.15, 0)
+MapControlBtn.BackgroundColor3 = Color3.fromRGB(30, 80, 150)
+MapControlBtn.TextColor3 = Color3.new(1, 1, 1)
+MapControlBtn.Font = Enum.Font.GothamBold
+MapControlBtn.TextSize = 14
+MapControlBtn.Parent = MainFrame
+
+-- قسم التبرعات (مصغر)
+local DonateLabel = Instance.new("TextLabel")
+DonateLabel.Text = ArabicText.DonateTitle
+DonateLabel.Size = UDim2.new(0, 240, 0, 25)
+DonateLabel.Position = UDim2.new(0.5, -120, 0.45, 0)
+DonateLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+DonateLabel.Font = Enum.Font.Gotham
+DonateLabel.BackgroundTransparency = 1
+DonateLabel.TextSize = 13
+DonateLabel.Parent = MainFrame
+
+local Donate5Btn = Instance.new("TextButton")
+Donate5Btn.Text = ArabicText.Donate5
+Donate5Btn.Size = UDim2.new(0, 110, 0, 40) -- حجم أصغر
+Donate5Btn.Position = UDim2.new(0.3, -55, 0.55, 0)
+Donate5Btn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
+Donate5Btn.TextColor3 = Color3.new(1, 1, 1)
+Donate5Btn.Font = Enum.Font.GothamBold
+Donate5Btn.TextSize = 12
+Donate5Btn.Parent = MainFrame
+
+local Donate10Btn = Instance.new("TextButton")
+Donate10Btn.Text = ArabicText.Donate10
+Donate10Btn.Size = UDim2.new(0, 110, 0, 40) -- حجم أصغر
+Donate10Btn.Position = UDim2.new(0.7, -55, 0.55, 0)
+Donate10Btn.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
+Donate10Btn.TextColor3 = Color3.new(1, 1, 1)
+Donate10Btn.Font = Enum.Font.GothamBold
+Donate10Btn.TextSize = 12
+Donate10Btn.Parent = MainFrame
+
+-- قسم الأداء (مصغر)
+local PerfLabel = Instance.new("TextLabel")
+PerfLabel.Text = ArabicText.Performance
+PerfLabel.Size = UDim2.new(0, 240, 0, 20)
+PerfLabel.Position = UDim2.new(0.5, -120, 0.75, 0)
+PerfLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+PerfLabel.Font = Enum.Font.Gotham
+PerfLabel.BackgroundTransparency = 1
+PerfLabel.TextSize = 12
+PerfLabel.Parent = MainFrame
+
+local FPSLabel = Instance.new("TextLabel")
+FPSLabel.Text = ArabicText.FPS .. "0"
+FPSLabel.Size = UDim2.new(0, 110, 0, 25)
+FPSLabel.Position = UDim2.new(0.3, -55, 0.82, 0)
+FPSLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+FPSLabel.Font = Enum.Font.GothamBold
+FPSLabel.BackgroundTransparency = 1
+FPSLabel.TextXAlignment = Enum.TextXAlignment.Left
+FPSLabel.TextSize = 12
+FPSLabel.Parent = MainFrame
+
+local PingLabel = Instance.new("TextLabel")
+PingLabel.Text = ArabicText.Ping .. "0ms"
+PingLabel.Size = UDim2.new(0, 110, 0, 25)
+PingLabel.Position = UDim2.new(0.7, -55, 0.82, 0)
+PingLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+PingLabel.Font = Enum.Font.GothamBold
+PingLabel.BackgroundTransparency = 1
+PingLabel.TextXAlignment = Enum.TextXAlignment.Left
+PingLabel.TextSize = 12
+PingLabel.Parent = MainFrame
+
+-- زر التنقل الذكي
+local ToggleUI = Instance.new("TextButton")
+ToggleUI.Name = "ToggleUI"
+ToggleUI.Size = UDim2.new(0, 120, 0, 30) -- حجم أصغر
+ToggleUI.Position = UDim2.new(0.5, -60, 1, -40)
+ToggleUI.Text = ArabicText.CloseUI
+ToggleUI.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+ToggleUI.TextColor3 = Color3.new(1, 1, 1)
+ToggleUI.Font = Enum.Font.GothamBold
+ToggleUI.TextSize = 12
+ToggleUI.Parent = Gui
+
+-- تأثيرات التمرير
+local function ButtonHoverEffect(btn)
+    btn.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = 0.2}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = 0}):Play()
+    end)
 end
 
--- العنوان --
-local Title = CreateElement("TextLabel", {
-    Text = ARABIC_TEXTS.Title,
-    Size = UDim2.new(0.9, 0, 0, 25),
-    Position = UDim2.new(0.05, 0, 0.02, 0),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBlack,
-    TextSize = 14,
-    BackgroundTransparency = 1,
-    Parent = MainFrame
-})
+-- تطبيق التأثير على الأزرار
+for _, btn in ipairs(MainFrame:GetChildren()) do
+    if btn:IsA("TextButton") then
+        ButtonHoverEffect(btn)
+    end
+end
+ButtonHoverEffect(ToggleUI)
 
--- أزرار التحكم الأساسية --
-local MapButton = CreateElement("TextButton", {
-    Text = ARABIC_TEXTS.MapControl,
-    Size = UDim2.new(0.9, 0, 0, 30),
-    Position = UDim2.new(0.05, 0, 0.15, 0),
-    BackgroundColor3 = Color3.fromRGB(0, 120, 180),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    Parent = MainFrame
-})
-
--- زر AFK --
-local AFKButton = CreateElement("TextButton", {
-    Text = ARABIC_TEXTS.AFK,
-    Size = UDim2.new(0.44, 0, 0, 30),
-    Position = UDim2.new(0.05, 0, 0.3, 0),
-    BackgroundColor3 = Color3.fromRGB(80, 80, 120),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    Parent = MainFrame
-})
-
--- زر تعزيز FPS --
-local FPSBoostButton = CreateElement("TextButton", {
-    Text = ARABIC_TEXTS.BoostFPS,
-    Size = UDim2.new(0.44, 0, 0, 30),
-    Position = UDim2.new(0.51, 0, 0.3, 0),
-    BackgroundColor3 = Color3.fromRGB(120, 0, 200),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    Parent = MainFrame
-})
-
--- نظام التبرعات المدمج --
-local DonateFrame = CreateElement("Frame", {
-    Size = UDim2.new(0.9, 0, 0, 60),
-    Position = UDim2.new(0.05, 0, 0.45, 0),
-    BackgroundTransparency = 1,
-    Parent = MainFrame
-})
-
-CreateElement("TextLabel", {
-    Text = ARABIC_TEXTS.DonateTitle,
-    Size = UDim2.new(1, 0, 0, 20),
-    TextColor3 = Color3.fromRGB(180, 180, 180),
-    Font = Enum.Font.Gotham,
-    TextSize = 12,
-    BackgroundTransparency = 1,
-    Parent = DonateFrame
-})
-
-local Donate5Button = CreateElement("TextButton", {
-    Text = ARABIC_TEXTS.Donate5,
-    Size = UDim2.new(0.48, 0, 0, 30),
-    Position = UDim2.new(0, 0, 0.5, 0),
-    BackgroundColor3 = Color3.fromRGB(0, 150, 70),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    Parent = DonateFrame
-})
-
-local Donate10Button = CreateElement("TextButton", {
-    Text = ARABIC_TEXTS.Donate10,
-    Size = UDim2.new(0.48, 0, 0, 30),
-    Position = UDim2.new(0.52, 0, 0.5, 0),
-    BackgroundColor3 = Color3.fromRGB(140, 0, 220),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    Parent = DonateFrame
-})
-
--- نظام مراقبة الأداء --
-local PerformanceFrame = CreateElement("Frame", {
-    Size = UDim2.new(0.9, 0, 0, 40),
-    Position = UDim2.new(0.05, 0, 0.7, 0),
-    BackgroundTransparency = 1,
-    Parent = MainFrame
-})
-
-local FPSLabel = CreateElement("TextLabel", {
-    Text = ARABIC_TEXTS.FPS .. "0",
-    Size = UDim2.new(0.45, 0, 0, 20),
-    TextColor3 = Color3.new(0.5, 1, 0.5),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    BackgroundTransparency = 1,
-    TextXAlignment = Enum.TextXAlignment.Left,
-    Parent = PerformanceFrame
-})
-
-local PingLabel = CreateElement("TextLabel", {
-    Text = ARABIC_TEXTS.Ping .. "0ms",
-    Size = UDim2.new(0.45, 0, 0, 20),
-    Position = UDim2.new(0.55, 0, 0, 0),
-    TextColor3 = Color3.new(0.5, 0.8, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 12,
-    BackgroundTransparency = 1,
-    TextXAlignment = Enum.TextXAlignment.Left,
-    Parent = PerformanceFrame
-})
-
--- زر التبديل الذكي --
-local ToggleButton = CreateElement("TextButton", {
-    Text = ARABIC_TEXTS.CloseUI,
-    Size = UDim2.new(0, 100, 0, 25),
-    Position = UDim2.new(0.5, -50, 1, -30),
-    BackgroundColor3 = Color3.fromRGB(40, 45, 60),
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.GothamBold,
-    TextSize = 11,
-    Parent = D88UI
-})
-
--- نظام السحب المحسن --
-local dragging, dragInput, dragStart, startPos
-
-local function UpdateInput(input)
-    local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    ToggleButton.Position = UDim2.new(0.5, -50, 1, -30) + UDim2.new(0, delta.X, 0, delta.Y)
+-- تحديث أداء اللعبة
+local function UpdatePerformance()
+    local fps = math.floor(1 / RunService.RenderStepped:Wait())
+    local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+    
+    FPSLabel.Text = ArabicText.FPS .. fps
+    PingLabel.Text = ArabicText.Ping .. ping .. "ms"
+    
+    -- تغيير ألوان حسب الأداء
+    FPSLabel.TextColor3 = fps < 30 and Color3.fromRGB(255, 50, 50) or fps < 60 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
+    PingLabel.TextColor3 = ping > 300 and Color3.fromRGB(255, 50, 50) or ping > 150 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 200, 255)
 end
 
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        UpdateInput(input)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
--- نظام التبرعات --
-local GAMEPASS_IDS = {
-    Donate5 = 1013443613
-    Donate10 = 1013691424
-}
-
-local function HandleDonation(gamepassId)
-    MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassId)
+-- تبديل القائمة
+local function ToggleUIVisibility()
+    MainFrame.Visible = not MainFrame.Visible
+    ToggleUI.Text = MainFrame.Visible and ArabicText.CloseUI or ArabicText.OpenUI
 end
 
-Donate5Button.MouseButton1Click:Connect(function()
-    HandleDonation(GAMEPASS_IDS.Donate5)
-end)
+-- أحداث الأزرار
+ToggleUI.MouseButton1Click:Connect(ToggleUIVisibility)
 
-Donate10Button.MouseButton1Click:Connect(function()
-    HandleDonation(GAMEPASS_IDS.Donate10)
-end)
+-- تحديث الأداء
+RunService.RenderStepped:Connect(UpdatePerformance)
 
--- نظام AFK --
-local AFKMode = false
-AFKButton.MouseButton1Click:Connect(function()
-    AFKMode = not AFKMode
-    AFKButton.BackgroundColor3 = AFKMode and Color3.fromRGB(120, 120, 180) or
+-- إشعار التحميل
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = ArabicText.MainTitle,
+    Text = ArabicText.Loading,
+    Duration = 2
+})
+
+print("تم تحميل السكربت بنجاح - النسخة العربية المطورة")
