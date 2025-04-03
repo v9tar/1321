@@ -1,77 +1,151 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local Toggle = false
-local StoredProperties = {}
+local ToggleFPS = false
+local ToggleAFK = false
+local StoredParts = {}
 
-local function SetPartTransparent(part)
-    StoredProperties[part] = {
-        Transparency = part.Transparency,
-        Decals = {}
-    }
-    
-    part.Transparency = 1
-    
-    for _, child in ipairs(part:GetChildren()) do
-        if child:IsA("Decal") then
-            StoredProperties[part].Decals[child] = child.Transparency
-            child.Transparency = 1
-        end
-    end
-end
-
-local function RestorePart(part)
-    if StoredProperties[part] then
-        part.Transparency = StoredProperties[part].Transparency
-        
-        for decal, transparency in pairs(StoredProperties[part].Decals) do
-            if decal.Parent then
-                decal.Transparency = transparency
-            end
-        end
-        
-        StoredProperties[part] = nil
-    end
-end
-
-local function ToggleParts()
-    Toggle = not Toggle
-    
-    if Toggle then
-        for _, descendant in ipairs(workspace:GetDescendants()) do
-            if descendant:IsA("BasePart") and not descendant:IsDescendantOf(character) then
-                SetPartTransparent(descendant)
-            end
-        end
-    else
-        for part, _ in pairs(StoredProperties) do
-            if part.Parent then
-                RestorePart(part)
-            end
-        end
-    end
-end
-
--- إنشاء واجهة المستخدم
+-- إنشاء واجهة مستخدم متطورة
 local Gui = Instance.new("ScreenGui")
-local Button = Instance.new("TextButton")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local ToggleFPSButton = Instance.new("TextButton")
+local ToggleAFKButton = Instance.new("TextButton")
+local StatusLabel = Instance.new("TextLabel")
+local CloseButton = Instance.new("TextButton")
 
-Gui.Name = "FPS_Booster"
+Gui.Name = "BloxFruits_SuperScript"
 Gui.Parent = game:GetService("CoreGui")
 
-Button.Name = "Toggle"
-Button.Parent = Gui
-Button.Size = UDim2.new(0, 100, 0, 40)
-Button.Position = UDim2.new(1, -120, 1, -60)
-Button.Text = "تفعيل FPS Boost"
-Button.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-Button.TextColor3 = Color3.new(1, 1, 1)
+Frame.Parent = Gui
+Frame.Size = UDim2.new(0, 220, 0, 180)
+Frame.Position = UDim2.new(0.5, -110, 0.5, -90)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+Frame.Active = true
+Frame.Draggable = true
 
-Button.MouseButton1Click:Connect(ToggleParts)
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = Frame
+
+Title.Parent = Frame
+Title.Text = "Blox Fruits Script"
+Title.Size = UDim2.new(0, 200, 0, 30)
+Title.Position = UDim2.new(0.5, -100, 0, 10)
+Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title.Font = Enum.Font.GothamBold
+
+ToggleFPSButton.Name = "ToggleFPS"
+ToggleFPSButton.Parent = Frame
+ToggleFPSButton.Size = UDim2.new(0, 180, 0, 40)
+ToggleFPSButton.Position = UDim2.new(0.5, -90, 0.3, -10)
+ToggleFPSButton.Text = "تشغيل وضع FPS Boost"
+ToggleFPSButton.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+ToggleFPSButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleFPSButton.Font = Enum.Font.GothamBold
+
+ToggleAFKButton.Name = "ToggleAFK"
+ToggleAFKButton.Parent = Frame
+ToggleAFKButton.Size = UDim2.new(0, 180, 0, 40)
+ToggleAFKButton.Position = UDim2.new(0.5, -90, 0.6, -10)
+ToggleAFKButton.Text = "تشغيل وضع AFK"
+ToggleAFKButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+ToggleAFKButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleAFKButton.Font = Enum.Font.GothamBold
+
+StatusLabel.Parent = Frame
+StatusLabel.Size = UDim2.new(0, 180, 0, 20)
+StatusLabel.Position = UDim2.new(0.5, -90, 0.85, -5)
+StatusLabel.Text = "الحالة: جاهز"
+StatusLabel.TextColor3 = Color3.new(1, 1, 1)
+StatusLabel.Font = Enum.Font.Gotham
+
+CloseButton.Parent = Frame
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.Text = "X"
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+
+-- وظائف إخفاء الماب
+local function HideMap()
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant:IsA("BasePart") and not descendant:IsDescendantOf(character) then
+            StoredParts[descendant] = {
+                Transparency = descendant.Transparency,
+                CanCollide = descendant.CanCollide,
+                Parent = descendant.Parent
+            }
+            descendant.Transparency = 1
+            descendant.CanCollide = false
+        end
+    end
+end
+
+local function ShowMap()
+    for part, properties in pairs(StoredParts) do
+        if part.Parent == nil then
+            part.Parent = properties.Parent
+        end
+        part.Transparency = properties.Transparency
+        part.CanCollide = properties.CanCollide
+    end
+    StoredParts = {}
+end
+
+-- وظيفة AFK لمنع الطرد
+local function EnableAFK()
+    local VirtualUser = game:GetService("VirtualUser")
+    player.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+end
+
+-- التحكم في الوظائف
+ToggleFPSButton.MouseButton1Click:Connect(function()
+    ToggleFPS = not ToggleFPS
+    if ToggleFPS then
+        HideMap()
+        ToggleFPSButton.Text = "إيقاف وضع FPS Boost"
+        StatusLabel.Text = "الحالة: FPS Boost مفعل"
+        ToggleFPSButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    else
+        ShowMap()
+        ToggleFPSButton.Text = "تشغيل وضع FPS Boost"
+        StatusLabel.Text = "الحالة: جاهز"
+        ToggleFPSButton.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+    end
+end)
+
+ToggleAFKButton.MouseButton1Click:Connect(function()
+    ToggleAFK = not ToggleAFK
+    if ToggleAFK then
+        EnableAFK()
+        ToggleAFKButton.Text = "إيقاف وضع AFK"
+        StatusLabel.Text = "الحالة: AFK مفعل"
+        ToggleAFKButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    else
+        ToggleAFKButton.Text = "تشغيل وضع AFK"
+        StatusLabel.Text = "الحالة: جاهز"
+        ToggleAFKButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+    end
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    Gui:Destroy()
+end)
 
 -- تحديث الشخصية عند إعادة الولادة
 player.CharacterAdded:Connect(function(newChar)
     character = newChar
 end)
 
-print("تم تحميل السكربت بنجاح! استخدم الزر في الزاوية اليمنى السفلية.")
+-- إخفاء الواجهة عند الضغط على ESC
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Escape then
+        Frame.Visible = not Frame.Visible
+    end
+end)
+
+print("تم تحميل السكربت بنجاح! استخدم ESC لإظهار/إخفاء الواجهة")
