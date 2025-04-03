@@ -1,0 +1,77 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local Toggle = false
+local StoredProperties = {}
+
+local function SetPartTransparent(part)
+    StoredProperties[part] = {
+        Transparency = part.Transparency,
+        Decals = {}
+    }
+    
+    part.Transparency = 1
+    
+    for _, child in ipairs(part:GetChildren()) do
+        if child:IsA("Decal") then
+            StoredProperties[part].Decals[child] = child.Transparency
+            child.Transparency = 1
+        end
+    end
+end
+
+local function RestorePart(part)
+    if StoredProperties[part] then
+        part.Transparency = StoredProperties[part].Transparency
+        
+        for decal, transparency in pairs(StoredProperties[part].Decals) do
+            if decal.Parent then
+                decal.Transparency = transparency
+            end
+        end
+        
+        StoredProperties[part] = nil
+    end
+end
+
+local function ToggleParts()
+    Toggle = not Toggle
+    
+    if Toggle then
+        for _, descendant in ipairs(workspace:GetDescendants()) do
+            if descendant:IsA("BasePart") and not descendant:IsDescendantOf(character) then
+                SetPartTransparent(descendant)
+            end
+        end
+    else
+        for part, _ in pairs(StoredProperties) do
+            if part.Parent then
+                RestorePart(part)
+            end
+        end
+    end
+end
+
+-- إنشاء واجهة المستخدم
+local Gui = Instance.new("ScreenGui")
+local Button = Instance.new("TextButton")
+
+Gui.Name = "FPS_Booster"
+Gui.Parent = game:GetService("CoreGui")
+
+Button.Name = "Toggle"
+Button.Parent = Gui
+Button.Size = UDim2.new(0, 100, 0, 40)
+Button.Position = UDim2.new(1, -120, 1, -60)
+Button.Text = "تفعيل FPS Boost"
+Button.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+Button.TextColor3 = Color3.new(1, 1, 1)
+
+Button.MouseButton1Click:Connect(ToggleParts)
+
+-- تحديث الشخصية عند إعادة الولادة
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+end)
+
+print("تم تحميل السكربت بنجاح! استخدم الزر في الزاوية اليمنى السفلية.")
