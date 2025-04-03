@@ -1,5 +1,5 @@
--- Ultimate Fruit Trade Controller v15.0 FINAL
--- السكربت الكامل مع جميع الإصلاحات
+-- Ultimate Fruit Trade Controller v16.0 FINAL
+-- النسخة النهائية الكاملة مع جميع الإصلاحات
 
 local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -11,11 +11,9 @@ local HS = game:GetService("HttpService")
 local function SecureFunction(func)
     return function(...)
         local args = {...}
-        local success, result = pcall(function()
-            return func(unpack(args))
-        end)
+        local success, result = pcall(func, unpack(args))
         if not success then
-            warn("خطأ في التنفيذ:", result)
+            warn("خطأ في النظام:", result)
         end
         return success, result
     end
@@ -23,14 +21,14 @@ end
 
 --[[ إنشاء الواجهة ]]
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "TradeController_"..HS:GenerateGUID(false)
+GUI.Name = "TradeControl_"..HS:GenerateGUID(false)
 GUI.ResetOnSpawn = false
 GUI.Parent = game:GetService("CoreGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -110)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Size = UDim2.new(0, 320, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.Active = true
 MainFrame.Parent = GUI
 
@@ -45,8 +43,8 @@ TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 TitleBar.Parent = MainFrame
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Text = " تحكم التداول v15.0"
-TitleText.TextColor3 = Color3.fromRGB(220, 220, 220)
+TitleText.Text = " Ultimate Controller v16.0"
+TitleText.TextColor3 = Color3.fromRGB(200, 200, 200)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Size = UDim2.new(0.7, 0, 1, 0)
 TitleText.Position = UDim2.new(0.05, 0, 0, 0)
@@ -62,7 +60,7 @@ ContentFrame.Parent = MainFrame
 
 -- عناصر التحكم
 local PlayerBox = Instance.new("TextBox")
-PlayerBox.PlaceholderText = "اسم اللاعب (2+ أحرف)"
+PlayerBox.PlaceholderText = "اسم اللاعب (3+ أحرف)"
 PlayerBox.Size = UDim2.new(1, 0, 0, 30)
 PlayerBox.Position = UDim2.new(0, 0, 0, 10)
 PlayerBox.ClearTextOnFocus = false
@@ -74,42 +72,43 @@ ControlBtn.Size = UDim2.new(1, 0, 0, 35)
 ControlBtn.Position = UDim2.new(0, 0, 0, 50)
 ControlBtn.Parent = ContentFrame
 
-local JumpToggle = Instance.new("TextButton")
-JumpToggle.Text = "تعطيل القفز (له)"
-JumpToggle.Size = UDim2.new(0.48, 0, 0, 35)
-JumpToggle.Position = UDim2.new(0, 0, 0, 95)
-JumpToggle.Parent = ContentFrame
+local JumpToggleHim = Instance.new("TextButton")
+JumpToggleHim.Text = "تعطيل القفز (له)"
+JumpToggleHim.Size = UDim2.new(0.48, 0, 0, 35)
+JumpToggleHim.Position = UDim2.new(0, 0, 0, 95)
+JumpToggleHim.Parent = ContentFrame
 
-local SelfJumpToggle = Instance.new("TextButton")
-SelfJumpToggle.Text = "تعطيل القفز (لي)"
-SelfJumpToggle.Size = UDim2.new(0.48, 0, 0, 35)
-SelfJumpToggle.Position = UDim2.new(0.52, 0, 0, 95)
-SelfJumpToggle.Parent = ContentFrame
+local JumpToggleMe = Instance.new("TextButton")
+JumpToggleMe.Text = "تعطيل القفز (لي)"
+JumpToggleMe.Size = UDim2.new(0.48, 0, 0, 35)
+JumpToggleMe.Position = UDim2.new(0.52, 0, 0, 95)
+JumpToggleMe.Parent = ContentFrame
 
-local AcceptBtn = Instance.new("TextButton")
-AcceptBtn.Text = "قبول التداول"
-AcceptBtn.Size = UDim2.new(1, 0, 0, 35)
-AcceptBtn.Position = UDim2.new(0, 0, 0, 140)
-AcceptBtn.Parent = ContentFrame
+local AcceptHimBtn = Instance.new("TextButton")
+AcceptHimBtn.Text = "قبول له"
+AcceptHimBtn.Size = UDim2.new(1, 0, 0, 35)
+AcceptHimBtn.Position = UDim2.new(0, 0, 0, 140)
+AcceptHimBtn.Parent = ContentFrame
 
 --[[ الأنظمة الأساسية ]]
 local ControlledPlayer = nil
 local Debounce = false
 
 local function FindPlayer(name)
-    name = name:lower():gsub("[%c%z]", ""):sub(1, 20)
-    if #name < 2 then return nil end
+    name = name:lower():gsub("[^%w]", ""):sub(1, 20)
+    if #name < 3 then return nil end
     
     local closestPlayer, minDiff = nil, math.huge
     
     for _, player in pairs(game:GetService("Players"):GetPlayers()) do
         if player ~= Player then
-            local playerName = player.Name:lower()
-            local diff = math.abs(#playerName - #name)
-            
-            if playerName:find(name) and diff < minDiff then
-                closestPlayer = player
-                minDiff = diff
+            local playerName = player.Name:lower():gsub("[^%w]", "")
+            if playerName:find(name) then
+                local diff = math.abs(#playerName - #name)
+                if diff < minDiff then
+                    closestPlayer = player
+                    minDiff = diff
+                end
             end
         end
     end
@@ -134,56 +133,56 @@ local ControlSystem = {
         return true
     end),
     
-    ForceAccept = SecureFunction(function()
-        local found = false
-        for _, button in pairs(game:GetService("CoreGui"):GetDescendants()) do
-            if button:IsA("TextButton") and button.Text:lower():match("^accept") then
-                for _, v in pairs(getconnections(button.MouseButton1Click)) do
-                    v:Fire()
-                    found = true
-                end
+    ForceAcceptHim = SecureFunction(function()
+        if not ControlledPlayer then return false end
+        
+        local success = false
+        for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteEvent") and remote.Name:lower():find("accept") then
+                remote:FireServer(true)
+                success = true
             end
         end
-        return found
+        return success
     end)
 }
 
---[[ نظام السحب ]]
+--[[ نظام السحب المتقدم ]]
 local dragging, dragStart, frameStart = false, nil, nil
+
+local function IsEmptySpace(mousePos)
+    local absPos = MainFrame.AbsolutePosition
+    local absSize = MainFrame.AbsoluteSize
+    
+    if mousePos.X < absPos.X or mousePos.X > absPos.X + absSize.X then return false end
+    if mousePos.Y < absPos.Y or mousePos.Y > absPos.Y + absSize.Y then return false end
+    
+    for _, child in ipairs(MainFrame:GetDescendants()) do
+        if child:IsA("GuiButton") or child:IsA("TextBox") then
+            local cPos = child.AbsolutePosition
+            local cSize = child.AbsoluteSize
+            if mousePos.X >= cPos.X and mousePos.X <= cPos.X + cSize.X and
+               mousePos.Y >= cPos.Y and mousePos.Y <= cPos.Y + cSize.Y then
+                return false
+            end
+        end
+    end
+    
+    return true
+end
 
 UIS.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local mousePos = input.Position
-        local absPos = MainFrame.AbsolutePosition
-        local absSize = MainFrame.AbsoluteSize
-        
-        if mousePos.X >= absPos.X and mousePos.X <= absPos.X + absSize.X and
-           mousePos.Y >= absPos.Y and mousePos.Y <= absPos.Y + absSize.Y then
-           
-            local clickedOnElement = false
-            for _, child in ipairs(MainFrame:GetDescendants()) do
-                if child:IsA("GuiButton") or child:IsA("TextBox") then
-                    local childPos = child.AbsolutePosition
-                    local childSize = child.AbsoluteSize
-                    if mousePos.X >= childPos.X and mousePos.X <= childPos.X + childSize.X and
-                       mousePos.Y >= childPos.Y and mousePos.Y <= childPos.Y + childSize.Y then
-                        clickedOnElement = true
-                        break
-                    end
-                end
-            end
+        if IsEmptySpace(input.Position) then
+            dragging = true
+            dragStart = input.Position
+            frameStart = MainFrame.Position
             
-            if not clickedOnElement then
-                dragging = true
-                dragStart = mousePos
-                frameStart = MainFrame.Position
-                
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
-                end)
-            end
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end
 end)
@@ -211,40 +210,42 @@ ControlBtn.MouseButton1Click:Connect(function()
         PlayerBox.Text = target.Name
         ControlBtn.Text = "التحكم: "..target.Name
     else
-        warn("لم يتم العثور على اللاعب")
+        warn("اللاعب غير موجود!")
     end
     
     Debounce = false
 end)
 
-JumpToggle.MouseButton1Click:Connect(function()
+JumpToggleHim.MouseButton1Click:Connect(function()
     if not ControlledPlayer then return end
     
-    local newState = JumpToggle.Text == "تعطيل القفز (له)"
+    local newState = JumpToggleHim.Text == "تعطيل القفز (له)"
     local success = ControlSystem.ToggleJump(ControlledPlayer, newState)
     
     if success then
-        JumpToggle.Text = newState and "تمكين القفز (له)" or "تعطيل القفز (له)"
+        JumpToggleHim.Text = newState and "تمكين القفز (له)" or "تعطيل القفز (له)"
     else
-        warn("فشل في التحكم بقفز اللاعب")
+        warn("فشل في التحكم بقفز اللاعب!")
     end
 end)
 
-SelfJumpToggle.MouseButton1Click:Connect(function()
-    local newState = SelfJumpToggle.Text == "تعطيل القفز (لي)"
+JumpToggleMe.MouseButton1Click:Connect(function()
+    local newState = JumpToggleMe.Text == "تعطيل القفز (لي)"
     local success = ControlSystem.ToggleJump(Player, newState)
     
     if success then
-        SelfJumpToggle.Text = newState and "تمكين القفز (لي)" or "تعطيل القفز (لي)"
+        JumpToggleMe.Text = newState and "تمكين القفز (لي)" or "تعطيل القفز (لي)"
     else
-        warn("فشل في التحكم بقفزك")
+        warn("فشل في التحكم بقفزك!")
     end
 end)
 
-AcceptBtn.MouseButton1Click:Connect(function()
-    local success = ControlSystem.ForceAccept()
-    if not success then
-        warn("تأكد من فتح نافذة التداول أولاً!")
+AcceptHimBtn.MouseButton1Click:Connect(function()
+    local success = ControlSystem.ForceAcceptHim()
+    if success then
+        warn("تم إرسال طلب القبول للاعب!")
+    else
+        warn("فشل في إرسال الطلب!")
     end
 end)
 
@@ -256,4 +257,4 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
-warn("تم تحميل سكربت التحكم بنجاح!")
+warn("تم تحميل السكربت بنجاح!")
