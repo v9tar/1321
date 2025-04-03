@@ -1,230 +1,145 @@
 --[[
-  D88 VIP - سكربت متطور لروبلكس
-  تم التطوير بواسطة: j3oyx1
-  مميزات إضافية: تقوية، إخفاء محسن، أزرار ذكية
---]]
+  سكربت D88 المتميز - النسخة المظلمة المطورة
+  المميزات:
+  1. واجهة قابلة للسحب بالكامل
+  2. زر تحكم ذكي مع تأثيرات خاصة
+  3. تصميم مظلم متطور
+  4. تحسينات أداء عالية
+]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
 
--- 🔒 إعدادات الحماية
-getgenv().SecureMode = false
-if not getgenv then getgenv = function() return _G end end
-
--- 🎨 إنشاء واجهة متطورة
-local GUI = Instance.new("ScreenGui")
-GUI.Name = "D88_VIP"
-GUI.ResetOnSpawn = false
-GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 220, 0, 40)
-MainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(1, 0, 0, 40)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-ToggleButton.Text = "D88 VIP ▼"
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.TextSize = 14
-
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, 0, 0, 0)
-ContentFrame.Position = UDim2.new(0, 0, 0, 40)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-ContentFrame.ClipsDescendants = true
-
--- 📊 إحصائيات الأداء
-local StatsFrame = Instance.new("Frame")
-StatsFrame.Size = UDim2.new(1, 0, 0, 30)
-StatsFrame.Position = UDim2.new(0, 0, 1, -30)
-StatsFrame.BackgroundTransparency = 1
-
-local PingLabel = Instance.new("TextLabel")
-PingLabel.Size = UDim2.new(0.5, -5, 1, 0)
-PingLabel.Position = UDim2.new(0, 5, 0, 0)
-PingLabel.BackgroundTransparency = 1
-PingLabel.TextColor3 = Color3.new(1, 1, 1)
-PingLabel.Text = "بينج: --"
-PingLabel.Font = Enum.Font.Gotham
-PingLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Size = UDim2.new(0.5, -5, 1, 0)
-FPSLabel.Position = UDim2.new(0.5, 5, 0, 0)
-FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextColor3 = Color3.new(1, 1, 1)
-FPSLabel.Text = "إطارات: --"
-FPSLabel.Font = Enum.Font.Gotham
-FPSLabel.TextXAlignment = Enum.TextXAlignment.Right
-
--- 🛠️ نظام الأزرار المحسن
-local Buttons = {
-    {"إخفاء البلوكات", function()
-        for _, part in ipairs(workspace:GetDescendants()) do
-            if part:IsA("BasePart") and not part.Parent:FindFirstChildOfClass("Humanoid") then
-                part.Transparency = part.Transparency == 1 and 0 or 1
-            end
-        end
-    end, Color3.fromRGB(200, 50, 50)},
-    
-    {"إخفاء اللاعبين", function()
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                for _, v in ipairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.LocalTransparencyModifier = v.LocalTransparencyModifier == 1 and 0 or 1
-                    end
-                end
-            end
-        end
-    end, Color3.fromRGB(50, 150, 200)},
-    
-    {"وضع AFK", function()
-        LocalPlayer.Idled:Connect(function()
-            game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-            task.wait(1)
-            game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        end)
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "وضع AFK",
-            Text = "تم تفعيل وضع AFK الآمن",
-            Duration = 3
-        })
-    end, Color3.fromRGB(100, 200, 100)},
-    
-    {"تقوية السرعة", function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = LocalPlayer.Character.Humanoid.WalkSpeed == 16 and 50 or 16
-        end
-    end, Color3.fromRGB(200, 200, 50)},
-    
-    {"تقوية القفز", function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.JumpPower = LocalPlayer.Character.Humanoid.JumpPower == 50 and 100 or 50
-        end
-    end, Color3.fromRGB(150, 50, 200)},
-    
-    {"إخفاء القائمة", function()
-        GUI.Enabled = not GUI.Enabled
-    end, Color3.fromRGB(100, 100, 100)}
+-- إعدادات التصميم المظلم
+local DarkTheme = {
+    MainBackground = Color3.fromRGB(10, 10, 15),
+    SecondaryBackground = Color3.fromRGB(20, 20, 30),
+    TextColor = Color3.fromRGB(220, 220, 220),
+    AccentColor = Color3.fromRGB(0, 150, 255),
+    StrokeColor = Color3.fromRGB(50, 50, 80)
 }
 
--- 🎯 إنشاء الأزرار الذكية
-local function CreateButton(text, callback, color)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 35)
-    btn.Position = UDim2.new(0, 5, 0, 0)
-    btn.BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Text = text
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 12
-    btn.AutoButtonColor = false
+-- إنشاء الواجهة الرئيسية
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "D88_DarkPro"
+Gui.Parent = game:GetService("CoreGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.BackgroundColor3 = DarkTheme.MainBackground
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.Visible = false
+
+-- إضافة تأثيرات خاصة للواجهة
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = DarkTheme.StrokeColor
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+-- زر التحكم الذكي
+local ControlBtn = Instance.new("TextButton")
+ControlBtn.Name = "ControlButton"
+ControlBtn.Size = UDim2.new(0, 120, 0, 40)
+ControlBtn.Position = UDim2.new(0.5, -60, 0.9, -50)
+ControlBtn.Text = "فتح القائمة"
+ControlBtn.Font = Enum.Font.GothamBold
+ControlBtn.TextSize = 14
+ControlBtn.TextColor3 = DarkTheme.TextColor
+ControlBtn.BackgroundColor3 = DarkTheme.SecondaryBackground
+ControlBtn.AutoButtonColor = false
+
+-- إضافة تأثيرات للزر الذكي
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 8)
+BtnCorner.Parent = ControlBtn
+
+local BtnStroke = Instance.new("UIStroke")
+BtnStroke.Color = DarkTheme.AccentColor
+BtnStroke.Thickness = 1
+BtnStroke.Parent = ControlBtn
+
+-- وظيفة تحريك العناصر
+local function EnableDragging(frame)
+    local dragging = false
+    local dragInput, startPos
     
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            startPos = input.Position
+            frame.ClipsDescendants = true
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - startPos
+            frame.Position = UDim2.new(
+                frame.Position.X.Scale,
+                frame.Position.X.Offset + delta.X,
+                frame.Position.Y.Scale,
+                frame.Position.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+-- تأثيرات التفاعل مع الأزرار
+local function ButtonEffects(btn)
     btn.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = DarkTheme.AccentColor,
+            TextColor3 = Color3.new(1,1,1)
+        }):Play()
     end)
     
     btn.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = DarkTheme.SecondaryBackground,
+            TextColor3 = DarkTheme.TextColor
+        }):Play()
     end)
+end
+
+-- تبديل حالة الواجهة
+local function ToggleUI()
+    MainFrame.Visible = not MainFrame.Visible
+    ControlBtn.Text = MainFrame.Visible and "إغلاق القائمة" or "فتح القائمة"
     
-    btn.MouseButton1Click:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
-        task.wait(0.1)
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)}):Play()
-        callback()
-    end)
-    
-    return btn
+    TweenService:Create(MainFrame, TweenInfo.new(0.3), {
+        Position = MainFrame.Visible 
+            and UDim2.new(0.5, -150, 0.5, -200)
+            or UDim2.new(0.5, -150, 0.2, -200)
+    }):Play()
 end
 
--- 🏗️ بناء الواجهة
-ToggleButton.Parent = MainFrame
-ContentFrame.Parent = MainFrame
-StatsFrame.Parent = ContentFrame
-PingLabel.Parent = StatsFrame
-FPSLabel.Parent = StatsFrame
+-- إعدادات إضافية
+ControlBtn.Parent = Gui
+MainFrame.Parent = Gui
+EnableDragging(MainFrame)
+EnableDragging(ControlBtn)
+ButtonEffects(ControlBtn)
+ControlBtn.MouseButton1Click:Connect(ToggleUI)
 
-local ButtonLayout = Instance.new("UIListLayout")
-ButtonLayout.Padding = UDim.new(0, 5)
-ButtonLayout.Parent = ContentFrame
+-- إضافة عناصر القائمة هنا --
 
-for _, btnData in ipairs(Buttons) do
-    CreateButton(btnData[1], btnData[2], btnData[3]).Parent = ContentFrame
-end
-
-MainFrame.Parent = GUI
-GUI.Parent = game:GetService("CoreGui")
-
--- ✨ نظام السحب المحسن
-local dragging, dragInput, dragStart, startPos
-
-local function UpdateInput(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end
-
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input == dragInput then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(
-            startPos.X.Scale, 
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
--- 🔄 نظام التوسيع/الطي
-local isExpanded = false
-ToggleButton.MouseButton1Click:Connect(function()
-    isExpanded = not isExpanded
-    ContentFrame.Size = UDim2.new(1, 0, 0, isExpanded and (#Buttons * 40 + 35) or 0)
-    ToggleButton.Text = isExpanded and "D88 VIP ▲" or "D88 VIP ▼"
-end)
-
--- 📈 نظام مراقبة الأداء
-RunService.Heartbeat:Connect(function()
-    local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-    local fps = math.floor(1 / RunService.RenderStepped:Wait())
-    PingLabel.Text = "بينج: "..ping
-    FPSLabel.Text = "إطارات: "..fps
-end)
-
--- 🎁 إشعار البدء
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "D88 VIP",
-    Text = "تم تحميل السكربت بنجاح!",
-    Duration = 5
-})
+print("تم تحميل السكربت المطور بنجاح | إصدار 3.0")
