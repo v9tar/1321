@@ -1,58 +1,136 @@
--- Roblox Fruit Trading Controller v2.0
--- Compatible with Delta, Flex, Hydrogen, and other versions
+-- Ultimate Fruit Trade Controller v10.5
+-- Compatible with all Roblox versions (Delta, Flex, Hydrogen, Legacy)
 
 local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
+local TS = game:GetService("TweenService")
+local RS = game:GetService("RunService")
+local HS = game:GetService("HttpService")
 
--- GUI Creation
+--[[
+    نظام الحماية المتقدم
+]]
+local function SecureFunction(func)
+    return function(...)
+        local args = {...}
+        return pcall(function()
+            return func(unpack(args))
+        end)
+    end
+end
+
+--[[
+    إنشاء واجهة المستخدم المتطورة
+]]
 local GUI = Instance.new("ScreenGui")
+GUI.Name = HS:GenerateGUID(false)
+GUI.ResetOnSpawn = false
+GUI.Parent = game:GetService("CoreGui")
+
 local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local TargetBox = Instance.new("TextBox")
+local UICorner = Instance.new("UICorner")
+local TitleBar = Instance.new("Frame")
+local TitleText = Instance.new("TextLabel")
+local CloseBtn = Instance.new("TextButton")
+local MinimizeBtn = Instance.new("TextButton")
+local SettingsBtn = Instance.new("TextButton")
+local ContentFrame = Instance.new("Frame")
+
+-- تكوين الواجهة
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 320, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -140)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Parent = GUI
+
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- شريط العنوان
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 32)
+TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+TitleBar.Parent = MainFrame
+
+TitleText.Name = "TitleText"
+TitleText.Text = " Ultimate Controller v10.5"
+TitleText.TextColor3 = Color3.fromRGB(220, 220, 220)
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Size = UDim2.new(0.6, 0, 1, 0)
+TitleText.Position = UDim2.new(0.05, 0, 0, 0)
+TitleText.Font = Enum.Font.GothamMedium
+TitleText.Parent = TitleBar
+
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+CloseBtn.Size = UDim2.new(0, 32, 1, 0)
+CloseBtn.Position = UDim2.new(1, -32, 0, 0)
+CloseBtn.Parent = TitleBar
+
+MinimizeBtn.Name = "MinimizeBtn"
+MinimizeBtn.Text = "🗗"
+MinimizeBtn.Size = UDim2.new(0, 32, 1, 0)
+MinimizeBtn.Position = UDim2.new(1, -64, 0, 0)
+MinimizeBtn.Parent = TitleBar
+
+SettingsBtn.Name = "SettingsBtn"
+SettingsBtn.Text = "-"
+SettingsBtn.Size = UDim2.new(0, 32, 1, 0)
+SettingsBtn.Position = UDim2.new(1, -96, 0, 0)
+SettingsBtn.Parent = TitleBar
+
+-- إطار المحتوى
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2.new(1, -20, 1, -60)
+ContentFrame.Position = UDim2.new(0, 10, 0, 50)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Parent = MainFrame
+
+--[[
+    نظام التحكم في اللاعبين
+]]
+local PlayerBox = Instance.new("TextBox")
 local ControlBtn = Instance.new("TextButton")
 local JumpToggle = Instance.new("TextButton")
 local AcceptToggle = Instance.new("TextButton")
 
--- GUI Configuration
-GUI.Name = "TradeController"
-GUI.Parent = game.CoreGui
-GUI.ResetOnSpawn = false
+PlayerBox.Name = "PlayerBox"
+PlayerBox.PlaceholderText = "اسم اللاعب"
+PlayerBox.Size = UDim2.new(1, 0, 0, 30)
+PlayerBox.Position = UDim2.new(0, 0, 0, 10)
+PlayerBox.Parent = ContentFrame
 
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = GUI
-MainFrame.Size = UDim2.new(0, 250, 0, 200)
-MainFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.BackgroundTransparency = 0.3
+ControlBtn.Name = "ControlBtn"
+ControlBtn.Text = "بدء التحكم"
+ControlBtn.Size = UDim2.new(1, 0, 0, 35)
+ControlBtn.Position = UDim2.new(0, 0, 0, 50)
+ControlBtn.Parent = ContentFrame
 
-Title.Text = "Fruit Trade Controller v2.0"
-Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 25)
+JumpToggle.Name = "JumpToggle"
+JumpToggle.Text = "تعطيل القفز (له)"
+JumpToggle.Size = UDim2.new(0.48, 0, 0, 35)
+JumpToggle.Position = UDim2.new(0, 0, 0, 95)
+JumpToggle.Parent = ContentFrame
 
-TargetBox.PlaceholderText = "Player Name"
-TargetBox.Parent = MainFrame
-TargetBox.Position = UDim2.new(0.1, 0, 0.2, 0)
-TargetBox.Size = UDim2.new(0.8, 0, 0, 25)
+local SelfJumpToggle = JumpToggle:Clone()
+SelfJumpToggle.Name = "SelfJumpToggle"
+SelfJumpToggle.Text = "تعطيل القفز (لي)"
+SelfJumpToggle.Position = UDim2.new(0.52, 0, 0, 95)
+SelfJumpToggle.Parent = ContentFrame
 
-ControlBtn.Text = "Start Control"
-ControlBtn.Parent = MainFrame
-ControlBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
-ControlBtn.Size = UDim2.new(0.8, 0, 0, 30)
+AcceptToggle.Name = "AcceptToggle"
+AcceptToggle.Text = "قبول التداول إجباري"
+AcceptToggle.Size = UDim2.new(1, 0, 0, 35)
+AcceptToggle.Position = UDim2.new(0, 0, 0, 140)
+AcceptToggle.Parent = ContentFrame
 
-JumpToggle.Text = "Disable Jump"
-JumpToggle.Parent = MainFrame
-JumpToggle.Position = UDim2.new(0.1, 0, 0.55, 0)
-JumpToggle.Size = UDim2.new(0.35, 0, 0, 30)
-
-AcceptToggle.Text = "Force Accept"
-AcceptToggle.Parent = MainFrame
-AcceptToggle.Position = UDim2.new(0.55, 0, 0.55, 0)
-AcceptToggle.Size = UDim2.new(0.35, 0, 0, 30)
-
--- Control System
+--[[
+    الأنظمة الأساسية
+]]
 local ControlledPlayer = nil
 local OriginalSettings = {}
+local Debounce = false
 
 local function FindPlayer(name)
     for _, player in pairs(game:GetService("Players"):GetPlayers()) do
@@ -63,62 +141,115 @@ local function FindPlayer(name)
     return nil
 end
 
-local function ControlCharacter(char)
-    if char and char:FindFirstChild("Humanoid") then
-        OriginalSettings.WalkSpeed = char.Humanoid.WalkSpeed
-        OriginalSettings.JumpPower = char.Humanoid.JumpPower
-    end
-end
-
-local function ToggleJump(state)
-    if ControlledPlayer and ControlledPlayer.Character then
-        local humanoid = ControlledPlayer.Character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.JumpPower = state and 0 or OriginalSettings.JumpPower
+local ControlSystem = {
+    ToggleJump = SecureFunction(function(target, state)
+        if target and target.Character then
+            local humanoid = target.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = state and 0 or (OriginalSettings[target] and OriginalSettings[target].JumpPower or 50)
+            end
         end
-    end
-end
-
-local function ForceAcceptTrade()
-    -- Works with most trading systems
-    for _, button in pairs(game:GetService("CoreGui"):GetDescendants()) do
-        if button:IsA("TextButton") and (button.Text:lower():find("accept") or button.Text:lower():find("confirm")) then
-            fireclickdetector(button:FindFirstChildOfClass("ClickDetector"))
+    end),
+    
+    ForceAccept = SecureFunction(function()
+        for _, button in pairs(game:GetService("GuiService"):GetGuiObjects()) do
+            if button:IsA("TextButton") and (button.Text:lower():find("accept") or button.Text:lower():find("confirm")) then
+                button:FireEvent("MouseButton1Click")
+            end
         end
+    end)
+}
+
+--[[
+    نظام السحب المتقدم
+]]
+local Dragging, DragInput, DragStart, StartPos
+
+local function IsEmptySpace(mousePos)
+    local framePos = MainFrame.AbsolutePosition
+    local frameSize = MainFrame.AbsoluteSize
+    
+    if mousePos.X >= framePos.X and mousePos.X <= framePos.X + frameSize.X and
+       mousePos.Y >= framePos.Y and mousePos.Y <= framePos.Y + frameSize.Y then
+        
+        for _, child in ipairs(MainFrame:GetDescendants()) do
+            if child:IsA("GuiButton") or child:IsA("TextBox") then
+                local childPos = child.AbsolutePosition
+                local childSize = child.AbsoluteSize
+                if mousePos.X >= childPos.X and mousePos.X <= childPos.X + childSize.X and
+                   mousePos.Y >= childPos.Y and mousePos.Y <= childPos.Y + childSize.Y then
+                    return false
+                end
+            end
+        end
+        return true
     end
+    return false
 end
 
+UIS.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and IsEmptySpace(input.Position) then
+        Dragging = true
+        DragStart = input.Position
+        StartPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                Dragging = false
+            end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if Dragging and input == DragInput then
+        local Delta = input.Position - DragStart
+        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+    end
+end)
+
+--[[
+    توصيل الأزرار
+]]
 ControlBtn.MouseButton1Click:Connect(function()
-    local target = FindPlayer(TargetBox.Text)
+    local target = FindPlayer(PlayerBox.Text)
     if target then
         ControlledPlayer = target
-        ControlCharacter(target.Character)
-        ControlBtn.Text = "Controlling: "..target.Name
+        ControlBtn.Text = "التحكم في: " .. target.Name
     end
 end)
 
 JumpToggle.MouseButton1Click:Connect(function()
-    ToggleJump(JumpToggle.Text == "Disable Jump")
-    JumpToggle.Text = JumpToggle.Text == "Disable Jump" and "Enable Jump" or "Disable Jump"
-end)
-
-AcceptToggle.MouseButton1Click:Connect(function()
-    ForceAcceptTrade()
-end)
-
--- Mobile Compatibility
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        MainFrame.Position = UDim2.new(0, input.Position.X - MainFrame.AbsoluteSize.X/2, 
-        0, input.Position.Y - MainFrame.AbsoluteSize.Y/2)
+    if ControlledPlayer then
+        ControlSystem.ToggleJump(ControlledPlayer, JumpToggle.Text == "تعطيل القفز (له)")
+        JumpToggle.Text = JumpToggle.Text == "تعطيل القفز (له)" and "تمكين القفز (له)" or "تعطيل القفز (له)"
     end
 end)
 
--- Auto-Update for Character Changes
-game:GetService("Players").PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(char)
-        if player == ControlledPlayer then
-            ControlCharacter(char)
-        end
-    end)
+SelfJumpToggle.MouseButton1Click:Connect(function()
+    ControlSystem.ToggleJump(Player, SelfJumpToggle.Text == "تعطيل القفز (لي)")
+    SelfJumpToggle.Text = SelfJumpToggle.Text == "تعطيل القفز (لي)" and "تمكين القفز (لي)" or "تعطيل القفز (لي)"
 end)
+
+AcceptToggle.MouseButton1Click:Connect(function()
+    ControlSystem.ForceAccept()
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    GUI:Destroy()
+end)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    ContentFrame.Visible = not ContentFrame.Visible
+    MainFrame.Size = ContentFrame.Visible and UDim2.new(0, 320, 0, 280) or UDim2.new(0, 320, 0, 32)
+end)
+
+-- حماية ضد الحذف
+RS.Heartbeat:Connect(function()
+    if not GUI or not GUI.Parent then
+        GUI = GUI:Clone()
+        GUI.Parent = game:GetService("CoreGui")
+    end
+end)
+
+warn("تم تحميل سكربت التحكم بنجاح! | Ultimate Controller v10.5")
