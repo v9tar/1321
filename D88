@@ -1,106 +1,110 @@
-# ╔══════════════════════════════════════╗
-# ║    🚀 R17 ULTIMATE USERNAME HUNTER   ║
-# ║      الإصدار الذهبي الكامل          ║
-# ╚══════════════════════════════════════╝
+--[[
+  السكربت يعمل على معظم المنفذين (Executors)
+  قم بتشغيله بواسطة زر الحق (Execute)
+--]]
 
-import asyncio
-import aiohttp
-import random
-import string
-from datetime import datetime
-from colorama import Fore, init
+local Player = game:GetService("Players").LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
-# 🔄 تهيئة النظام
-init(autoreset=True)
+-- إنشاء واجهة المستخدم الرئيسية
+local MainGUI = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local ToggleMap = Instance.new("TextButton")
+local AFKButton = Instance.new("TextButton")
+local ExtraBtn1 = Instance.new("TextButton")
+local ToggleButtons = Instance.new("TextButton")
 
-class R17Hunter:
-    def __init__(self):
-        self.session = None
-        self.found = 0
-        self.attempts = 0
-        self.start_time = datetime.now()
-        
-        # 🎨 إعدادات الألوان
-        self.colors = {
-            'success': Fore.GREEN,
-            'error': Fore.RED,
-            'info': Fore.CYAN,
-            'warning': Fore.YELLOW
-        }
-        
-        # 🔐 قوالب اليوزرات
-        self.templates = [
-            'LLD',  # حرفين + رقم (AB1)
-            'LDL',  # حرف-رقم-حرف (A1B)
-            'DLL',  # رقم-حرفين (1AB)
-            'R17'   # النمط الخاص (R17)
-        ]
+-- إعدادات الواجهة
+MainGUI.Name = "DeltaTools"
+MainGUI.ResetOnSpawn = false
 
-    async def start_hunt(self):
-        """🎯 بدء عملية الصيد"""
-        print(f"{self.colors['info']}🚀 بدء عملية الصيد في: {self.start_time}")
-        
-        async with aiohttp.ClientSession() as self.session:
-            tasks = []
-            for _ in range(50):  # 50 عملية متزامنة
-                task = asyncio.create_task(self.check_username())
-                tasks.append(task)
-            await asyncio.gather(*tasks)
+MainFrame.Size = UDim2.new(0, 200, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
+MainFrame.BackgroundTransparency = 0.5
 
-    def generate_username(self):
-        """🎲 توليد يوزر عشوائي"""
-        pattern = random.choice(self.templates)
-        username = []
-        for char in pattern:
-            if char == 'L':
-                username.append(random.choice(string.ascii_uppercase))
-            elif char == 'D':
-                username.append(str(random.randint(0, 9)))
-            else:
-                username.append(char)
-        return ''.join(username)
+ToggleMap.Name = "ToggleMap"
+ToggleMap.Size = UDim2.new(0, 180, 0, 40)
+ToggleMap.Position = UDim2.new(0, 10, 0, 10)
+ToggleMap.Text = "إخفاء الماب"
 
-    async def check_username(self):
-        """🔍 التحقق من توفر اليوزر"""
-        while True:
-            username = self.generate_username()
-            self.attempts += 1
-            
-            try:
-                async with self.session.get(
-                    f"https://api.example.com/check?user={username}",
-                    timeout=5
-                ) as response:
-                    
-                    if response.status == 200:
-                        data = await response.json()
-                        if data['available']:
-                            self.found += 1
-                            print(f"{self.colors['success']}🎯 تم العثور على: {username}")
-                            self.save_result(username)
-                            
-            except Exception as e:
-                print(f"{self.colors['error']}⚠️ خطأ في الاتصال: {e}")
+AFKButton.Name = "AFKButton"
+AFKButton.Size = UDim2.new(0, 180, 0, 40)
+AFKButton.Position = UDim2.new(0, 10, 0, 60)
+AFKButton.Text = "وضع AFK"
 
-    def save_result(self, username):
-        """💾 حفظ النتائج"""
-        with open("R17_Results.txt", "a") as f:
-            f.write(f"{username}\n")
+ExtraBtn1.Name = "ExtraBtn1"
+ExtraBtn1.Size = UDim2.new(0, 180, 0, 40)
+ExtraBtn1.Position = UDim2.new(0, 10, 0, 110)
+ExtraBtn1.Text = "زر إضافي 1"
 
-    def show_stats(self):
-        """📊 عرض الإحصائيات"""
-        duration = datetime.now() - self.start_time
-        print(f"\n{self.colors['info']}📈 الإحصائيات النهائية:")
-        print(f"⏱️ المدة: {duration}")
-        print(f"🔎 عدد المحاولات: {self.attempts}")
-        print(f"🎯 اليوزرات الناجحة: {self.found}")
-        print(f"📂 تم حفظ النتائج في: R17_Results.txt")
+ToggleButtons.Name = "ToggleButtons"
+ToggleButtons.Size = UDim2.new(0, 180, 0, 40)
+ToggleButtons.Position = UDim2.new(0, 10, 0, 160)
+ToggleButtons.Text = "إخفاء الأزرار"
 
-if __name__ == "__main__":
-    hunter = R17Hunter()
-    try:
-        asyncio.run(hunter.start_hunt())
-    except KeyboardInterrupt:
-        pass
-    finally:
-        hunter.show_stats()
+-- إضافة العناصر إلى الواجهة
+MainFrame.Parent = MainGUI
+ToggleMap.Parent = MainFrame
+AFKButton.Parent = MainFrame
+ExtraBtn1.Parent = MainFrame
+ToggleButtons.Parent = MainFrame
+MainGUI.Parent = PlayerGui
+
+-- متغيرات التحكم
+local MapHidden = false
+local ButtonsVisible = true
+local AFKMode = false
+
+-- وظيفة إخفاء/إظهار الماب
+local function ToggleMapVisibility()
+    MapHidden = not MapHidden
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Transparency = MapHidden and 1 or 0
+            obj.CanCollide = not MapHidden
+        end
+    end
+end
+
+-- وظيفة AFK
+local function ToggleAFK()
+    AFKMode = not AFKMode
+    local Root = Player.Character:FindFirstChild("HumanoidRootPart")
+    if Root then
+        while AFKMode do
+            wait(1)
+            Root.CFrame = CFrame.new(0, 10000, 0)
+        end
+    end
+end
+
+-- وظيفة إخفاء الأزرار
+local function ToggleGUIButtons()
+    ButtonsVisible = not ButtonsVisible
+    for _, btn in pairs(MainFrame:GetChildren()) do
+        if btn:IsA("TextButton") then
+            btn.Visible = ButtonsVisible
+        end
+    end
+    ToggleButtons.Visible = true -- الإبقاء على زر التبديل مرئي
+end
+
+-- إعداد الأحداث
+ToggleMap.MouseButton1Click:Connect(ToggleMapVisibility)
+AFKButton.MouseButton1Click:Connect(ToggleAFK)
+ToggleButtons.MouseButton1Click:Connect(ToggleGUIButtons)
+
+-- إضافة زر إضافي مخصص (يمكنك تعديله)
+ExtraBtn1.MouseButton1Click:Connect(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "زر مخصص",
+        Text = "هذا زر إضافي يمكنك برمجته!"
+    })
+end)
+
+-- إخفاء الواجهة عند التحميل (استخدم INSERT لاستعادتها)
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        MainGUI.Enabled = not MainGUI.Enabled
+    end
+end)
