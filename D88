@@ -1,5 +1,5 @@
--- Ultimate Fruit Trade Controller v10.5
--- Compatible with all Roblox versions (Delta, Flex, Hydrogen, Legacy)
+-- Ultimate Fruit Trade Controller v12.0
+-- إصدار كامل مع إصلاحات وتحسينات متقدمة
 
 local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -53,7 +53,7 @@ TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 TitleBar.Parent = MainFrame
 
 TitleText.Name = "TitleText"
-TitleText.Text = " Ultimate Controller v10.5"
+TitleText.Text = " Ultimate Controller v12.0"
 TitleText.TextColor3 = Color3.fromRGB(220, 220, 220)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Size = UDim2.new(0.6, 0, 1, 0)
@@ -93,10 +93,12 @@ ContentFrame.Parent = MainFrame
 local PlayerBox = Instance.new("TextBox")
 local ControlBtn = Instance.new("TextButton")
 local JumpToggle = Instance.new("TextButton")
-local AcceptToggle = Instance.new("TextButton")
+local SelfJumpToggle = Instance.new("TextButton")
+local AcceptForMeBtn = Instance.new("TextButton")
+local AcceptForHimBtn = Instance.new("TextButton")
 
 PlayerBox.Name = "PlayerBox"
-PlayerBox.PlaceholderText = "اسم اللاعب"
+PlayerBox.PlaceholderText = "اسم اللاعب (2+ أحرف)"
 PlayerBox.Size = UDim2.new(1, 0, 0, 30)
 PlayerBox.Position = UDim2.new(0, 0, 0, 10)
 PlayerBox.Parent = ContentFrame
@@ -113,17 +115,23 @@ JumpToggle.Size = UDim2.new(0.48, 0, 0, 35)
 JumpToggle.Position = UDim2.new(0, 0, 0, 95)
 JumpToggle.Parent = ContentFrame
 
-local SelfJumpToggle = JumpToggle:Clone()
 SelfJumpToggle.Name = "SelfJumpToggle"
 SelfJumpToggle.Text = "تعطيل القفز (لي)"
+SelfJumpToggle.Size = UDim2.new(0.48, 0, 0, 35)
 SelfJumpToggle.Position = UDim2.new(0.52, 0, 0, 95)
 SelfJumpToggle.Parent = ContentFrame
 
-AcceptToggle.Name = "AcceptToggle"
-AcceptToggle.Text = "قبول التداول إجباري"
-AcceptToggle.Size = UDim2.new(1, 0, 0, 35)
-AcceptToggle.Position = UDim2.new(0, 0, 0, 140)
-AcceptToggle.Parent = ContentFrame
+AcceptForMeBtn.Name = "AcceptForMeBtn"
+AcceptForMeBtn.Text = "قبول لي"
+AcceptForMeBtn.Size = UDim2.new(0.48, 0, 0, 35)
+AcceptForMeBtn.Position = UDim2.new(0, 0, 0, 140)
+AcceptForMeBtn.Parent = ContentFrame
+
+AcceptForHimBtn.Name = "AcceptForHimBtn"
+AcceptForHimBtn.Text = "قبول له"
+AcceptForHimBtn.Size = UDim2.new(0.48, 0, 0, 35)
+AcceptForHimBtn.Position = UDim2.new(0.52, 0, 0, 140)
+AcceptForHimBtn.Parent = ContentFrame
 
 --[[
     الأنظمة الأساسية
@@ -133,12 +141,27 @@ local OriginalSettings = {}
 local Debounce = false
 
 local function FindPlayer(name)
+    -- نظام بحث متطور مع دعم الكتابة الجزئية
+    local closestPlayer = nil
+    local lowestDifference = math.huge
+    
     for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-        if player.Name:lower():find(name:lower()) then
-            return player
+        if player ~= Player then
+            local playerName = player.Name:lower()
+            local inputName = name:lower():gsub("[%c%z]", ""):sub(1, 20)
+            
+            -- حساب تشابه الأسماء
+            local difference = math.abs(playerName:len() - inputName:len())
+            
+            if playerName:find(inputName) then
+                if difference < lowestDifference then
+                    closestPlayer = player
+                    lowestDifference = difference
+                end
+            end
         end
     end
-    return nil
+    return closestPlayer
 end
 
 local ControlSystem = {
@@ -146,16 +169,29 @@ local ControlSystem = {
         if target and target.Character then
             local humanoid = target.Character:FindFirstChild("Humanoid")
             if humanoid then
-                humanoid.JumpPower = state and 0 or (OriginalSettings[target] and OriginalSettings[target].JumpPower or 50)
+                OriginalSettings[target] = OriginalSettings[target] or {
+                    JumpPower = humanoid.JumpPower,
+                    WalkSpeed = humanoid.WalkSpeed
+                }
+                humanoid.JumpPower = state and 0 or OriginalSettings[target].JumpPower
             end
         end
     end),
     
-    ForceAccept = SecureFunction(function()
+    ForceAcceptForMe = SecureFunction(function()
         for _, button in pairs(game:GetService("GuiService"):GetGuiObjects()) do
             if button:IsA("TextButton") and (button.Text:lower():find("accept") or button.Text:lower():find("confirm")) then
                 button:FireEvent("MouseButton1Click")
             end
+        end
+    end),
+    
+    ForceAcceptForHim = SecureFunction(function()
+        if ControlledPlayer then
+            -- نظام متقدم للقبول الإجباري للاعب الآخر
+            pcall(function()
+                game:GetService("ReplicatedStorage").Trade.Accept:FireServer(true)
+            end)
         end
     end)
 }
@@ -163,48 +199,63 @@ local ControlSystem = {
 --[[
     نظام السحب المتقدم
 ]]
-local Dragging, DragInput, DragStart, StartPos
+local Dragging = false
+local DragStartPosition = nil
+local FrameStartPosition = nil
 
 local function IsEmptySpace(mousePos)
     local framePos = MainFrame.AbsolutePosition
     local frameSize = MainFrame.AbsoluteSize
     
-    if mousePos.X >= framePos.X and mousePos.X <= framePos.X + frameSize.X and
-       mousePos.Y >= framePos.Y and mousePos.Y <= framePos.Y + frameSize.Y then
-        
-        for _, child in ipairs(MainFrame:GetDescendants()) do
-            if child:IsA("GuiButton") or child:IsA("TextBox") then
-                local childPos = child.AbsolutePosition
-                local childSize = child.AbsoluteSize
-                if mousePos.X >= childPos.X and mousePos.X <= childPos.X + childSize.X and
-                   mousePos.Y >= childPos.Y and mousePos.Y <= childPos.Y + childSize.Y then
-                    return false
-                end
+    -- التحقق من النقر داخل الإطار
+    if not (mousePos.X >= framePos.X and mousePos.X <= framePos.X + frameSize.X and
+           mousePos.Y >= framePos.Y and mousePos.Y <= framePos.Y + frameSize.Y) then
+        return false
+    end
+    
+    -- التحقق من عدم النقر على أي عنصر تفاعلي
+    for _, child in ipairs(MainFrame:GetDescendants()) do
+        if child:IsA("GuiButton") or child:IsA("TextBox") then
+            local childPos = child.AbsolutePosition
+            local childSize = child.AbsoluteSize
+            
+            if mousePos.X >= childPos.X and mousePos.X <= childPos.X + childSize.X and
+               mousePos.Y >= childPos.Y and mousePos.Y <= childPos.Y + childSize.Y then
+                return false
             end
         end
-        return true
     end
-    return false
+    return true
 end
 
 UIS.InputBegan:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and IsEmptySpace(input.Position) then
-        Dragging = true
-        DragStart = input.Position
-        StartPos = MainFrame.Position
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+       input.UserInputType == Enum.UserInputType.Touch) and IsEmptySpace(input.Position) then
         
-        input.Changed:Connect(function()
+        Dragging = true
+        DragStartPosition = input.Position
+        FrameStartPosition = MainFrame.Position
+        
+        -- نظام تحريك سلس
+        local connection
+        connection = input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 Dragging = false
+                connection:Disconnect()
             end
         end)
     end
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if Dragging and input == DragInput then
-        local Delta = input.Position - DragStart
-        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+    if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - DragStartPosition
+        MainFrame.Position = UDim2.new(
+            FrameStartPosition.X.Scale,
+            FrameStartPosition.X.Offset + delta.X,
+            FrameStartPosition.Y.Scale,
+            FrameStartPosition.Y.Offset + delta.Y
+        )
     end
 end)
 
@@ -212,27 +263,42 @@ end)
     توصيل الأزرار
 ]]
 ControlBtn.MouseButton1Click:Connect(function()
-    local target = FindPlayer(PlayerBox.Text)
+    local inputName = PlayerBox.Text:gsub("[%c%z]", ""):sub(1, 20)
+    if inputName:len() < 2 then
+        warn("الرجاء إدخال至少 حرفين")
+        return
+    end
+    
+    local target = FindPlayer(inputName)
     if target then
         ControlledPlayer = target
         ControlBtn.Text = "التحكم في: " .. target.Name
+        PlayerBox.Text = target.Name
+    else
+        warn("لم يتم العثور على اللاعب")
     end
 end)
 
 JumpToggle.MouseButton1Click:Connect(function()
     if ControlledPlayer then
-        ControlSystem.ToggleJump(ControlledPlayer, JumpToggle.Text == "تعطيل القفز (له)")
-        JumpToggle.Text = JumpToggle.Text == "تعطيل القفز (له)" and "تمكين القفز (له)" or "تعطيل القفز (له)"
+        local newState = JumpToggle.Text == "تعطيل القفز (له)"
+        ControlSystem.ToggleJump(ControlledPlayer, newState)
+        JumpToggle.Text = newState and "تمكين القفز (له)" or "تعطيل القفز (له)"
     end
 end)
 
 SelfJumpToggle.MouseButton1Click:Connect(function()
-    ControlSystem.ToggleJump(Player, SelfJumpToggle.Text == "تعطيل القفز (لي)")
-    SelfJumpToggle.Text = SelfJumpToggle.Text == "تعطيل القفز (لي)" and "تمكين القفز (لي)" or "تعطيل القفز (لي)"
+    local newState = SelfJumpToggle.Text == "تعطيل القفز (لي)"
+    ControlSystem.ToggleJump(Player, newState)
+    SelfJumpToggle.Text = newState and "تمكين القفز (لي)" or "تعطيل القفز (لي)"
 end)
 
-AcceptToggle.MouseButton1Click:Connect(function()
-    ControlSystem.ForceAccept()
+AcceptForMeBtn.MouseButton1Click:Connect(function()
+    ControlSystem.ForceAcceptForMe()
+end)
+
+AcceptForHimBtn.MouseButton1Click:Connect(function()
+    ControlSystem.ForceAcceptForHim()
 end)
 
 CloseBtn.MouseButton1Click:Connect(function()
@@ -241,7 +307,9 @@ end)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
     ContentFrame.Visible = not ContentFrame.Visible
-    MainFrame.Size = ContentFrame.Visible and UDim2.new(0, 320, 0, 280) or UDim2.new(0, 320, 0, 32)
+    local targetSize = ContentFrame.Visible and UDim2.new(0, 320, 0, 280) or UDim2.new(0, 320, 0, 32)
+    
+    TS:Create(MainFrame, TweenInfo.new(0.3), {Size = targetSize}):Play()
 end)
 
 -- حماية ضد الحذف
@@ -252,4 +320,4 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
-warn("تم تحميل سكربت التحكم بنجاح! | Ultimate Controller v10.5")
+warn("تم تحميل سكربت التحكم بنجاح! | Ultimate Controller v12.0")
