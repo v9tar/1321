@@ -1,14 +1,13 @@
--- Ultimate Fruit Trade Controller v3.0
--- نظام متكامل مع إعادة بناء كاملة
+-- Ultimate Fruit Trade Controller v4.0
+-- النسخة الكاملة مع حل جميع المشاكل
 
 local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
-local TS = game:GetService("TweenService")
 local RS = game:GetService("RunService")
 local HS = game:GetService("HttpService")
 
 --[[ نظام الحماية المتقدم ]]
-local function SecureFunction(func)
+local function SecureExecute(func)
     return function(...)
         local args = {...}
         local success, result = pcall(function()
@@ -16,91 +15,91 @@ local function SecureFunction(func)
         end)
         if not success then
             warn("System Error:", result)
-            return false, result
+            return false
         end
-        return true, result
+        return true
     end
 end
 
 --[[ إنشاء الواجهة ]]
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "FruitControl_"..HS:GenerateGUID(false)
+GUI.Name = "FruitMaster_"..HS:GenerateGUID(false)
 GUI.ResetOnSpawn = false
 GUI.Parent = game:GetService("CoreGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 380, 0, 300)
-MainFrame.Position = UDim2.new(1, -390, 0.5, -150)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+MainFrame.Size = UDim2.new(0, 350, 0, 280)
+MainFrame.Position = UDim2.new(1, -360, 0.5, -140)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
 MainFrame.Active = true
 MainFrame.Parent = GUI
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
 -- شريط العنوان
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 40)
-TitleBar.BackgroundColor3 = Color3.fromRGB(35, 40, 50)
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(40, 45, 55)
 TitleBar.Parent = MainFrame
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Text = " FRUIT CONTROL PRO v3.0 "
+TitleText.Text = " FRUIT MASTER v4.0 "
 TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Size = UDim2.new(0.7, 0, 1, 0)
 TitleText.Position = UDim2.new(0.05, 0, 0, 0)
 TitleText.Font = Enum.Font.GothamBold
-TitleText.TextSize = 16
+TitleText.TextSize = 14
 TitleText.Parent = TitleBar
 
 -- إطار المحتوى
 local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, -20, 1, -70)
-ContentFrame.Position = UDim2.new(0, 10, 0, 50)
+ContentFrame.Size = UDim2.new(1, -20, 1, -65)
+ContentFrame.Position = UDim2.new(0, 10, 0, 45)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
 -- عناصر التحكم
 local PlayerBox = Instance.new("TextBox")
-PlayerBox.PlaceholderText = "Enter Player Name (3+ chars)"
-PlayerBox.Size = UDim2.new(1, 0, 0, 40)
+PlayerBox.PlaceholderText = "Enter Player Name"
+PlayerBox.Size = UDim2.new(1, 0, 0, 35)
 PlayerBox.Position = UDim2.new(0, 0, 0, 10)
 PlayerBox.ClearTextOnFocus = false
 PlayerBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-PlayerBox.BackgroundColor3 = Color3.fromRGB(40, 45, 55)
+PlayerBox.BackgroundColor3 = Color3.fromRGB(50, 55, 65)
 PlayerBox.Parent = ContentFrame
 
 local ControlBtn = Instance.new("TextButton")
 ControlBtn.Text = "START CONTROL"
-ControlBtn.Size = UDim2.new(1, 0, 0, 40)
-ControlBtn.Position = UDim2.new(0, 0, 0, 60)
-ControlBtn.BackgroundColor3 = Color3.fromRGB(50, 55, 65)
+ControlBtn.Size = UDim2.new(1, 0, 0, 35)
+ControlBtn.Position = UDim2.new(0, 0, 0, 55)
+ControlBtn.BackgroundColor3 = Color3.fromRGB(60, 65, 75)
 ControlBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ControlBtn.Parent = ContentFrame
 
 local JumpToggleHim = Instance.new("TextButton")
-JumpToggleHim.Text = "DISABLE HIS JUMP [OFF]"
+JumpToggleHim.Text = "HIS JUMP: ENABLED"
 JumpToggleHim.Size = UDim2.new(0.48, 0, 0, 40)
-JumpToggleHim.Position = UDim2.new(0, 0, 0, 110)
-JumpToggleHim.BackgroundColor3 = Color3.fromRGB(90, 20, 20)
+JumpToggleHim.Position = UDim2.new(0, 0, 0, 100)
+JumpToggleHim.BackgroundColor3 = Color3.fromRGB(60, 120, 60)
 JumpToggleHim.TextColor3 = Color3.fromRGB(255, 255, 255)
 JumpToggleHim.Parent = ContentFrame
 
 local JumpToggleMe = Instance.new("TextButton")
-JumpToggleMe.Text = "DISABLE MY JUMP [OFF]"
+JumpToggleMe.Text = "MY JUMP: ENABLED"
 JumpToggleMe.Size = UDim2.new(0.48, 0, 0, 40)
-JumpToggleMe.Position = UDim2.new(0.52, 0, 0, 110)
-JumpToggleMe.BackgroundColor3 = Color3.fromRGB(90, 20, 20)
+JumpToggleMe.Position = UDim2.new(0.52, 0, 0, 100)
+JumpToggleMe.BackgroundColor3 = Color3.fromRGB(60, 120, 60)
 JumpToggleMe.TextColor3 = Color3.fromRGB(255, 255, 255)
 JumpToggleMe.Parent = ContentFrame
 
 local AcceptHimBtn = Instance.new("TextButton")
-AcceptHimBtn.Text = "FORCE ACCEPT TRADE"
+AcceptHimBtn.Text = "FORCE ACCEPT"
 AcceptHimBtn.Size = UDim2.new(1, 0, 0, 40)
-AcceptHimBtn.Position = UDim2.new(0, 0, 0, 160)
-AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(20, 90, 20)
+AcceptHimBtn.Position = UDim2.new(0, 0, 0, 150)
+AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 120)
 AcceptHimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AcceptHimBtn.Parent = ContentFrame
 
@@ -110,9 +109,9 @@ local Debounce = false
 
 -- نظام البحث المحسن
 local function FindPlayer(name)
-    name = name:lower():gsub("[^%w]", ""):sub(1, 20)
     if #name < 3 then return nil end
     
+    name = name:lower():gsub("[^%w]", "")
     local closestPlayer, minDiff = nil, math.huge
     
     for _, player in pairs(game:GetService("Players"):GetPlayers()) do
@@ -131,44 +130,53 @@ local function FindPlayer(name)
     return closestPlayer
 end
 
--- نظام التحكم في القفز (إعادة بناء كاملة)
+-- نظام التحكم في القفز (إصلاح كامل)
 local JumpSystem = {
-    OriginalSettings = {},
+    States = {},
     
-    -- دالة التحكم الأساسية
-    Control = SecureFunction(function(target, state)
+    Toggle = SecureExecute(function(target, enable)
         if not target or not target.Character then return false end
         
         local humanoid = target.Character:FindFirstChildOfClass("Humanoid")
         if not humanoid then return false end
         
-        -- حفظ الإعدادات الأصلية
-        if not JumpSystem.OriginalSettings[target] then
-            JumpSystem.OriginalSettings[target] = {
-                JumpPower = humanoid.JumpPower,
-                WalkSpeed = humanoid.WalkSpeed
-            }
-        end
-        
-        -- تطبيق التغييرات
-        if state then
+        if enable then
+            -- تمكين القفز
+            if JumpSystem.States[target] then
+                humanoid.JumpPower = JumpSystem.States[target].JumpPower or 50
+                humanoid.WalkSpeed = JumpSystem.States[target].WalkSpeed or 16
+                JumpSystem.States[target] = nil
+            end
+        else
+            -- تعطيل القفز
+            if not JumpSystem.States[target] then
+                JumpSystem.States[target] = {
+                    JumpPower = humanoid.JumpPower,
+                    WalkSpeed = humanoid.WalkSpeed
+                }
+            end
             humanoid.JumpPower = 0
             humanoid.WalkSpeed = 16
-        else
-            humanoid.JumpPower = JumpSystem.OriginalSettings[target].JumpPower or 50
-            humanoid.WalkSpeed = JumpSystem.OriginalSettings[target].WalkSpeed or 16
         end
         
         return true
     end)
 }
 
--- نظام القبول الإجباري (إعادة بناء كاملة)
+-- نظام القبول الإجباري (إصلاح كامل)
 local AcceptSystem = {
-    ForceAccept = SecureFunction(function(target)
-        if not target then return false end
+    ForceAccept = SecureExecute(function()
+        -- البحث في الواجهة أولاً
+        for _, button in pairs(game:GetService("CoreGui"):GetDescendants()) do
+            if button:IsA("TextButton") and button.Text:lower():find("accept") then
+                for _, connection in pairs(getconnections(button.MouseButton1Click)) do
+                    connection:Fire()
+                    return true
+                end
+            end
+        end
         
-        -- الطريقة الأولى: البحث عن RemoteEvents
+        -- البحث في الأحداث البعيدة
         for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
             if remote:IsA("RemoteEvent") and remote.Name:lower():find("accept") then
                 remote:FireServer(true)
@@ -176,16 +184,7 @@ local AcceptSystem = {
             end
         end
         
-        -- الطريقة الثانية: محاكاة النقر
-        local virtualInput = game:GetService("VirtualInputManager")
-        local mouse = game:GetService("Players").LocalPlayer:GetMouse()
-        
-        -- محاكاة نقر الماوس
-        virtualInput:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 1)
-        wait(0.1)
-        virtualInput:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 1)
-        
-        return true
+        return false
     end)
 }
 
@@ -196,11 +195,9 @@ local function IsEmptySpace(mousePos)
     local absPos = MainFrame.AbsolutePosition
     local absSize = MainFrame.AbsoluteSize
     
-    -- التحقق من النقر داخل الإطار
     if mousePos.X < absPos.X or mousePos.X > absPos.X + absSize.X then return false end
     if mousePos.Y < absPos.Y or mousePos.Y > absPos.Y + absSize.Y then return false end
     
-    -- التحقق من عدم النقر على عناصر التحكم
     for _, child in ipairs(MainFrame:GetDescendants()) do
         if child:IsA("GuiButton") or child:IsA("TextBox") then
             local cPos = child.AbsolutePosition
@@ -216,18 +213,16 @@ local function IsEmptySpace(mousePos)
 end
 
 UIS.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        if IsEmptySpace(input.Position) then
-            dragging = true
-            dragStart = input.Position
-            frameStart = MainFrame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and IsEmptySpace(input.Position) then
+        dragging = true
+        dragStart = input.Position
+        frameStart = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
 end)
 
@@ -252,8 +247,7 @@ ControlBtn.MouseButton1Click:Connect(function()
     if target then
         ControlledPlayer = target
         PlayerBox.Text = target.Name
-        ControlBtn.Text = "CONTROLLING: "..target.Name
-        warn("Now controlling: "..target.Name)
+        ControlBtn.Text = "CONTROLLING: "..string.sub(target.Name, 1, 12)
     else
         warn("Player not found!")
     end
@@ -263,68 +257,64 @@ end)
 
 JumpToggleHim.MouseButton1Click:Connect(function()
     if not ControlledPlayer then 
-        warn("Please select a player first!")
+        warn("Select player first!")
         return 
     end
     
-    local newState = not JumpToggleHim.Text:find("ON")
-    local success = JumpSystem.Control(ControlledPlayer, newState)
+    local currentState = JumpToggleHim.Text:find("DISABLED")
+    local success = JumpSystem.Toggle(ControlledPlayer, currentState)
     
     if success then
-        JumpToggleHim.Text = newState and "DISABLE HIS JUMP [ON]" or "DISABLE HIS JUMP [OFF]"
-        JumpToggleHim.BackgroundColor3 = newState and Color3.fromRGB(20, 90, 20) or Color3.fromRGB(90, 20, 20)
-    else
-        warn("Failed to control his jump!")
+        if currentState then
+            JumpToggleHim.Text = "HIS JUMP: ENABLED"
+            JumpToggleHim.BackgroundColor3 = Color3.fromRGB(60, 120, 60)
+        else
+            JumpToggleHim.Text = "HIS JUMP: DISABLED"
+            JumpToggleHim.BackgroundColor3 = Color3.fromRGB(120, 60, 60)
+        end
     end
 end)
 
 JumpToggleMe.MouseButton1Click:Connect(function()
-    local newState = not JumpToggleMe.Text:find("ON")
-    local success = JumpSystem.Control(Player, newState)
+    local currentState = JumpToggleMe.Text:find("DISABLED")
+    local success = JumpSystem.Toggle(Player, currentState)
     
     if success then
-        JumpToggleMe.Text = newState and "DISABLE MY JUMP [ON]" or "DISABLE MY JUMP [OFF]"
-        JumpToggleMe.BackgroundColor3 = newState and Color3.fromRGB(20, 90, 20) or Color3.fromRGB(90, 20, 20)
-    else
-        warn("Failed to control your jump!")
+        if currentState then
+            JumpToggleMe.Text = "MY JUMP: ENABLED"
+            JumpToggleMe.BackgroundColor3 = Color3.fromRGB(60, 120, 60)
+        else
+            JumpToggleMe.Text = "MY JUMP: DISABLED"
+            JumpToggleMe.BackgroundColor3 = Color3.fromRGB(120, 60, 60)
+        end
     end
 end)
 
 AcceptHimBtn.MouseButton1Click:Connect(function()
-    if not ControlledPlayer then 
-        warn("Please select a player first!")
-        return 
-    end
-    
-    local success = AcceptSystem.ForceAccept(ControlledPlayer)
+    local success = AcceptSystem.ForceAccept()
     if success then
-        warn("Force accept sent successfully!")
-        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-        task.delay(0.3, function()
-            AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(20, 90, 20)
+        AcceptHimBtn.Text = "ACCEPT SENT!"
+        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 60)
+        task.delay(1, function()
+            AcceptHimBtn.Text = "FORCE ACCEPT"
+            AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 120)
         end)
     else
-        warn("Failed to force accept!")
-        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
-        task.delay(0.3, function()
-            AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(20, 90, 20)
+        AcceptHimBtn.Text = "FAILED!"
+        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(120, 60, 60)
+        task.delay(1, function()
+            AcceptHimBtn.Text = "FORCE ACCEPT"
+            AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 120)
         end)
     end
 end)
 
--- حماية متقدمة ضد الحذف
-local function AntiRemove()
-    while true do
-        if not GUI or not GUI.Parent then
-            GUI = GUI:Clone()
-            GUI.Parent = game:GetService("CoreGui")
-            warn("GUI protection activated!")
-        end
-        task.wait(5)
+-- حماية متقدمة
+RS.Heartbeat:Connect(function()
+    if not GUI or not GUI.Parent then
+        GUI = GUI:Clone()
+        GUI.Parent = game:GetService("CoreGui")
     end
-end
+end)
 
-task.spawn(AntiRemove)
-
--- إظهار رسالة التحميل
-warn("FRUIT CONTROL PRO v3.0 LOADED SUCCESSFULLY!")
+warn("FRUIT MASTER v4.0 LOADED SUCCESSFULLY!")
