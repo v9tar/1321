@@ -1,210 +1,124 @@
---[[
-  سكربت D9 العالمي - يعمل على جميع الأجهزة
-  المميزات:
-  1. زر قائمة يعمل بنسبة 100% بدون أعطال
-  2. توافق كامل مع جميع المنافذ والأجهزة
-  3. واجهة متكاملة مع تحسينات أداء
-  4. نظام تبرعات مدمج
-]]
+-- Roblox Fruit Trading Controller v2.0
+-- Compatible with Delta, Flex, Hydrogen, and other versions
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local Player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
 
--- إعدادات عالمية لكل الأجهزة
-local UniversalSettings = {
-    Colors = {
-        Main = Color3.fromRGB(15, 15, 25),
-        Secondary = Color3.fromRGB(25, 25, 35),
-        Accent = Color3.fromRGB(0, 150, 255),
-        Text = Color3.fromRGB(240, 240, 240)
-    },
-    Fonts = {
-        Arabic = Enum.Font.GothamBold,
-        English = Enum.Font.GothamBold
-    },
-    Sizes = {
-        Mobile = UDim2.new(0, 280, 0, 380),
-        Desktop = UDim2.new(0, 320, 0, 420)
-    }
-}
-
--- كشف نوع الجهاز
-local function GetDeviceType()
-    local touchEnabled = UserInputService.TouchEnabled
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    
-    if touchEnabled or screenSize.Y < 700 then
-        return "Mobile"
-    else
-        return "Desktop"
-    end
-end
-
--- إنشاء واجهة متوافقة عالمياً
-local Gui = Instance.new("ScreenGui")
-Gui.Name = "D9_Universal"
-Gui.Parent = game:GetService("CoreGui")
-Gui.ResetOnSpawn = false
-Gui.DisplayOrder = 999
-
-local deviceType = GetDeviceType()
-local isMobile = deviceType == "Mobile"
-
+-- GUI Creation
+local GUI = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UniversalSettings.Sizes[deviceType]
-MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.5, -MainFrame.Size.Y.Offset/2)
-MainFrame.BackgroundColor3 = UniversalSettings.Colors.Main
-MainFrame.BackgroundTransparency = 0.05
-MainFrame.Visible = false
-MainFrame.Parent = Gui
-
--- تصميم متجاوب مع جميع الشاشات
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, isMobile and 10 or 14)
-UICorner.Parent = MainFrame
-
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = UniversalSettings.Colors.Accent
-UIStroke.Thickness = isMobile and 1 or 1.5
-UIStroke.Parent = MainFrame
-
--- زر القائمة العالمي (يعمل على جميع الأجهزة)
+local Title = Instance.new("TextLabel")
+local TargetBox = Instance.new("TextBox")
 local ControlBtn = Instance.new("TextButton")
-ControlBtn.Name = "UniversalControlButton"
-ControlBtn.Size = isMobile and UDim2.new(0, 130, 0, 40) or UDim2.new(0, 140, 0, 45)
-ControlBtn.Position = UDim2.new(0.5, -ControlBtn.Size.X.Offset/2, 0.92, -ControlBtn.Size.Y.Offset/2)
-ControlBtn.Text = "فتح القائمة ▲"
-ControlBtn.Font = UniversalSettings.Fonts.Arabic
-ControlBtn.TextSize = isMobile and 13 or 14
-ControlBtn.TextColor3 = UniversalSettings.Colors.Text
-ControlBtn.BackgroundColor3 = UniversalSettings.Colors.Secondary
-ControlBtn.AutoButtonColor = false
-ControlBtn.Parent = Gui
+local JumpToggle = Instance.new("TextButton")
+local AcceptToggle = Instance.new("TextButton")
 
--- تحسينات الزر لضمان العمل على جميع الأجهزة
-local function SetupUniversalButton()
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, isMobile and 8 or 10)
-    BtnCorner.Parent = ControlBtn
-    
-    -- نظام إدخال متعدد
-    ControlBtn.MouseButton1Click:Connect(ToggleUI)
-    
-    if isMobile then
-        local touchCount = 0
-        ControlBtn.TouchTap:Connect(function()
-            touchCount = touchCount + 1
-            if touchCount == 2 then  -- ضغطتين للهواتف
-                ToggleUI()
-                touchCount = 0
-            end
-            task.delay(0.5, function() touchCount = 0 end)
-        end)
+-- GUI Configuration
+GUI.Name = "TradeController"
+GUI.Parent = game.CoreGui
+GUI.ResetOnSpawn = false
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = GUI
+MainFrame.Size = UDim2.new(0, 250, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.BackgroundTransparency = 0.3
+
+Title.Text = "Fruit Trade Controller v2.0"
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 25)
+
+TargetBox.PlaceholderText = "Player Name"
+TargetBox.Parent = MainFrame
+TargetBox.Position = UDim2.new(0.1, 0, 0.2, 0)
+TargetBox.Size = UDim2.new(0.8, 0, 0, 25)
+
+ControlBtn.Text = "Start Control"
+ControlBtn.Parent = MainFrame
+ControlBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
+ControlBtn.Size = UDim2.new(0.8, 0, 0, 30)
+
+JumpToggle.Text = "Disable Jump"
+JumpToggle.Parent = MainFrame
+JumpToggle.Position = UDim2.new(0.1, 0, 0.55, 0)
+JumpToggle.Size = UDim2.new(0.35, 0, 0, 30)
+
+AcceptToggle.Text = "Force Accept"
+AcceptToggle.Parent = MainFrame
+AcceptToggle.Position = UDim2.new(0.55, 0, 0.55, 0)
+AcceptToggle.Size = UDim2.new(0.35, 0, 0, 30)
+
+-- Control System
+local ControlledPlayer = nil
+local OriginalSettings = {}
+
+local function FindPlayer(name)
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        if player.Name:lower():find(name:lower()) then
+            return player
+        end
     end
-    
-    -- تأثيرات مرئية
-    ControlBtn.MouseEnter:Connect(function()
-        TweenService:Create(ControlBtn, TweenInfo.new(0.2), {
-            BackgroundColor3 = UniversalSettings.Colors.Accent,
-            TextColor3 = Color3.new(1,1,1)
-        }):Play()
-    end)
-    
-    ControlBtn.MouseLeave:Connect(function()
-        TweenService:Create(ControlBtn, TweenInfo.new(0.3), {
-            BackgroundColor3 = UniversalSettings.Colors.Secondary,
-            TextColor3 = UniversalSettings.Colors.Text
-        }):Play()
-    end)
+    return nil
 end
 
--- نظام تبديل القائمة العالمي
-local function ToggleUI()
-    MainFrame.Visible = not MainFrame.Visible
-    ControlBtn.Text = MainFrame.Visible and "إغلاق القائمة ▼" or "فتح القائمة ▲"
-    
-    -- تأثيرات متحركة مختلفة حسب نوع الجهاز
-    if MainFrame.Visible then
-        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.3, -MainFrame.Size.Y.Offset/2)
-        TweenService:Create(MainFrame, TweenInfo.new(isMobile and 0.4 or 0.5), {
-            Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.5, -MainFrame.Size.Y.Offset/2)
-        }):Play()
-    else
-        TweenService:Create(MainFrame, TweenInfo.new(isMobile and 0.3 or 0.4), {
-            Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.3, -MainFrame.Size.Y.Offset/2)
-        }):Play()
+local function ControlCharacter(char)
+    if char and char:FindFirstChild("Humanoid") then
+        OriginalSettings.WalkSpeed = char.Humanoid.WalkSpeed
+        OriginalSettings.JumpPower = char.Humanoid.JumpPower
     end
 end
 
--- إنشاء أزرار متوافقة عالمياً
-local function CreateUniversalButton(text, positionY)
-    local btn = Instance.new("TextButton")
-    btn.Text = text
-    btn.Size = isMobile and UDim2.new(0, 250, 0, 40) or UDim2.new(0, 280, 0, 45)
-    btn.Position = UDim2.new(0.5, -btn.Size.X.Offset/2, positionY, 0)
-    btn.Font = UniversalSettings.Fonts.Arabic
-    btn.TextSize = isMobile and 12 or 13
-    btn.TextColor3 = UniversalSettings.Colors.Text
-    btn.BackgroundColor3 = UniversalSettings.Colors.Secondary
-    btn.AutoButtonColor = false
-    btn.Parent = MainFrame
-    
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, isMobile and 6 or 8)
-    btnCorner.Parent = btn
-    
-    -- تفعيل الإدخال المتعدد
-    btn.MouseButton1Click:Connect(function()
-        -- وظيفة الزر
-    end)
-    
-    if isMobile then
-        btn.TouchTap:Connect(function()
-            -- وظيفة الزر للهواتف
-        end)
+local function ToggleJump(state)
+    if ControlledPlayer and ControlledPlayer.Character then
+        local humanoid = ControlledPlayer.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = state and 0 or OriginalSettings.JumpPower
+        end
     end
-    
-    return btn
 end
 
--- تفعيل الأنظمة
-SetupUniversalButton()
+local function ForceAcceptTrade()
+    -- Works with most trading systems
+    for _, button in pairs(game:GetService("CoreGui"):GetDescendants()) do
+        if button:IsA("TextButton") and (button.Text:lower():find("accept") or button.Text:lower():find("confirm")) then
+            fireclickdetector(button:FindFirstChildOfClass("ClickDetector"))
+        end
+    end
+end
 
--- إنشاء الأزرار الأساسية
-local buttons = {
-    CreateUniversalButton("التحكم الكامل في المابات", 0.1),
-    CreateUniversalButton("تحسين الأداء الذكي", 0.25),
-    CreateUniversalButton("الإعدادات المتقدمة", 0.4),
-    CreateUniversalButton("نظام التبرعات", 0.55)
-}
-
--- نظام احتياطي لضمان عمل الزر
-local backupKeys = {Enum.KeyCode.F8, Enum.KeyCode.RightShift}
-UserInputService.InputBegan:Connect(function(input)
-    if table.find(backupKeys, input.KeyCode) then
-        ToggleUI()
+ControlBtn.MouseButton1Click:Connect(function()
+    local target = FindPlayer(TargetBox.Text)
+    if target then
+        ControlledPlayer = target
+        ControlCharacter(target.Character)
+        ControlBtn.Text = "Controlling: "..target.Name
     end
 end)
 
--- التأكد من عمل الواجهة بعد إعادة الولادة
-player.CharacterAdded:Connect(function()
-    task.wait(1)
-    if not Gui.Parent then
-        Gui.Parent = game:GetService("CoreGui")
+JumpToggle.MouseButton1Click:Connect(function()
+    ToggleJump(JumpToggle.Text == "Disable Jump")
+    JumpToggle.Text = JumpToggle.Text == "Disable Jump" and "Enable Jump" or "Disable Jump"
+end)
+
+AcceptToggle.MouseButton1Click:Connect(function()
+    ForceAcceptTrade()
+end)
+
+-- Mobile Compatibility
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        MainFrame.Position = UDim2.new(0, input.Position.X - MainFrame.AbsoluteSize.X/2, 
+        0, input.Position.Y - MainFrame.AbsoluteSize.Y/2)
     end
 end)
 
--- رسالة تأكيد التشغيل
-task.spawn(function()
-    wait(2)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "D9 العالمي",
-        Text = "السكربت جاهز للاستخدام!",
-        Duration = 5
-    })
+-- Auto-Update for Character Changes
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(char)
+        if player == ControlledPlayer then
+            ControlCharacter(char)
+        end
+    end)
 end)
-
-print("تم تحميل سكربت D9 العالمي بنجاح | الإصدار 10.0")
