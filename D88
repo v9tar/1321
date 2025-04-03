@@ -1,0 +1,159 @@
+-- سكربت DB8 المتقدم لإخفاء المباني وتحسين الأداء
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local Toggle = false
+local UIVisible = true
+local StoredParts = {}
+
+-- إنشاء واجهة DB8 المتطورة
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "DB8_Ultimate"
+Gui.Parent = game:GetService("CoreGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "DB8_Main"
+MainFrame.Parent = Gui
+MainFrame.Size = UDim2.new(0, 300, 0, 250)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- زوايا مدورة للواجهة
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+-- عنوان الواجهة
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.Text = "DB8 - وضع التخفي"
+Title.Size = UDim2.new(0, 280, 0, 40)
+Title.Position = UDim2.new(0.5, -140, 0, 10)
+Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.BackgroundTransparency = 1
+
+-- زر التحكم الرئيسي
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Parent = MainFrame
+ToggleBtn.Size = UDim2.new(0, 260, 0, 50)
+ToggleBtn.Position = UDim2.new(0.5, -130, 0.3, 0)
+ToggleBtn.Text = "تفعيل وضع التخفي"
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+ToggleBtn.Font = Enum.Font.GothamBold
+
+-- زر إضافي لتحسين FPS
+local FPSBoostBtn = Instance.new("TextButton")
+FPSBoostBtn.Name = "FPSBoostBtn"
+FPSBoostBtn.Parent = MainFrame
+FPSBoostBtn.Size = UDim2.new(0, 260, 0, 50)
+FPSBoostBtn.Position = UDim2.new(0.5, -130, 0.6, 0)
+FPSBoostBtn.Text = "تحسين الأداء (FPS+)"
+FPSBoostBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+FPSBoostBtn.TextColor3 = Color3.new(1, 1, 1)
+FPSBoostBtn.Font = Enum.Font.GothamBold
+
+-- زر إخفاء/إظهار الواجهة
+local ToggleUI = Instance.new("TextButton")
+ToggleUI.Name = "ToggleUI"
+ToggleUI.Parent = Gui
+ToggleUI.Size = UDim2.new(0, 50, 0, 50)
+ToggleUI.Position = UDim2.new(1, -60, 1, -60)
+ToggleUI.Text = "≡"
+ToggleUI.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+ToggleUI.TextColor3 = Color3.new(1, 1, 1)
+ToggleUI.Font = Enum.Font.GothamBold
+ToggleUI.TextSize = 24
+
+-- وظائف السكربت المحسنة
+local function HideEverything()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and not obj:IsDescendantOf(character) then
+            StoredParts[obj] = {
+                Transparency = obj.Transparency,
+                CanCollide = obj.CanCollide,
+                Material = obj.Material
+            }
+            obj.Transparency = 1
+            obj.CanCollide = false
+            obj.Material = Enum.Material.Plastic
+        end
+    end
+    
+    -- تحسينات إضافية للأداء
+    settings().Rendering.QualityLevel = 1
+    game:GetService("Lighting").GlobalShadows = false
+    for _, effect in ipairs(game:GetService("Lighting"):GetChildren()) do
+        if effect:IsA("ParticleEmitter") then
+            effect.Enabled = false
+        end
+    end
+end
+
+local function ShowEverything()
+    for part, props in pairs(StoredParts) do
+        if part.Parent then
+            part.Transparency = props.Transparency
+            part.CanCollide = props.CanCollide
+            part.Material = props.Material
+        end
+    end
+    
+    -- استعادة الإعدادات الأصلية
+    settings().Rendering.QualityLevel = 8
+    game:GetService("Lighting").GlobalShadows = true
+    for _, effect in ipairs(game:GetService("Lighting"):GetChildren()) do
+        if effect:IsA("ParticleEmitter") then
+            effect.Enabled = true
+        end
+    end
+end
+
+-- نظام AFK الذكي
+local function EnableAFK()
+    local VirtualUser = game:GetService("VirtualUser")
+    player.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+end
+
+-- أحداث الأزرار
+ToggleBtn.MouseButton1Click:Connect(function()
+    Toggle = not Toggle
+    if Toggle then
+        HideEverything()
+        ToggleBtn.Text = "إيقاف وضع التخفي"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
+    else
+        ShowEverything()
+        ToggleBtn.Text = "تفعيل وضع التخفي"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    end
+end)
+
+FPSBoostBtn.MouseButton1Click:Connect(function()
+    EnableAFK()
+    FPSBoostBtn.Text = "تم تفعيل AFK + FPS"
+    FPSBoostBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+end)
+
+ToggleUI.MouseButton1Click:Connect(function()
+    UIVisible = not UIVisible
+    MainFrame.Visible = UIVisible
+end)
+
+-- تحديث الشخصية عند إعادة الولادة
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    if Toggle then
+        HideEverything()
+    end
+end)
+
+print("تم تحميل سكربت DB8 بنجاح! اضغط على ≡ لإظهار/إخفاء القائمة")
