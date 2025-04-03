@@ -1,138 +1,183 @@
 --[[
-  J3OYX1 ULTIMATE FIXED V12  
-  100% Working - No Errors - God Mode  
+  J3OYX1 FPS GOD V14
+  Ultimate Performance Booster - 24H Active
 --]]
 
-local Player = game:GetService("Players").LocalPlayer  
-local TweenService = game:GetService("TweenService")  
-local RunService = game:GetService("RunService")  
-local UIS = game:GetService("UserInputService")  
+local Player = game:GetService("Players").LocalPlayer
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Terrain = workspace.Terrain
+local CoreGui = game:GetService("CoreGui")
 
---====== [CORE SYSTEM] ======--  
-local GUI = Instance.new("ScreenGui")  
-GUI.Name = "J3_SuperTools"  
-GUI.ResetOnSpawn = false  
-GUI.Enabled = true -- Force Enable  
-GUI.DisplayOrder = 9999  
-GUI.Parent = Player:WaitForChild("PlayerGui") -- Better Parenting  
+-- ██████ [CORE SYSTEM] ██████ --
+local GUI = Instance.new("ScreenGui")
+GUI.Name = "J3_FPS_Ultimate"
+GUI.ResetOnSpawn = false
+GUI.DisplayOrder = 99999
 
-local MainFrame = Instance.new("Frame")  
-MainFrame.Size = UDim2.new(0, 180, 0, 250)  
-MainFrame.Position = UDim2.new(0, 10, 0.5, -125)  
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)  
-MainFrame.BorderSizePixel = 0  
-MainFrame.Visible = true -- Force Visible  
-MainFrame.Parent = GUI  
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 220, 0, 300)
+MainFrame.Position = UDim2.new(0, 10, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.BorderSizePixel = 0
 
---====== [FAILSAFE SYSTEM] ======--  
-if not GUI:IsDescendantOf(game) then  
-    GUI.Parent = Player:WaitForChild("PlayerGui")  
-end  
+-- ██████ [FPS BOOSTER SYSTEM] ██████ --
+local FPSLevels = {
+    {
+        Name = "EXTREME",
+        Action = function()
+            settings().Rendering.QualityLevel = 1
+            Lighting.GlobalShadows = false
+            setfpscap(1000)
+        end
+    },
+    {
+        Name = "INTELLIGENT",
+        Action = function()
+            settings().Rendering.QualityLevel = 5
+            Lighting.FogEnd = 500
+            setfpscap(144)
+        end
+    },
+    {
+        Name = "BALANCED",
+        Action = function()
+            settings().Rendering.QualityLevel = 10
+            Lighting.GlobalShadows = true
+            setfpscap(60)
+        end
+    }
+}
 
---====== [DRAG SYSTEM] ======--  
-local dragging, dragInput, dragStart  
-MainFrame.InputBegan:Connect(function(input)  
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then  
-        dragging = true  
-        dragStart = input.Position  
-        input.Changed:Connect(function()  
-            if input.UserInputState == Enum.UserInputState.End then  
-                dragging = false  
-            end  
-        end)  
-    end  
-end)  
+-- ██████ [PROXIMITY OPTIMIZATION] ██████ --
+local function OptimizeByDistance()
+    local character = Player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local rootPosition = character.HumanoidRootPart.Position
+        
+        for _, part in pairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local distance = (part.Position - rootPosition).Magnitude
+                
+                if distance > 500 then
+                    part.Transparency = 1
+                    part.CanCollide = false
+                elseif distance > 300 then
+                    part.Material = Enum.Material.Plastic
+                end
+            end
+        end
+    end
+end
 
-MainFrame.InputChanged:Connect(function(input)  
-    if input.UserInputType == Enum.UserInputType.MouseMovement then  
-        dragInput = input  
-    end  
-end)  
+-- ██████ [AUTO CLEANER] ██████ --
+local function CleanDistantObjects()
+    local character = Player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local rootPosition = character.HumanoidRootPart.Position
+        
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and (obj.Position - rootPosition).Magnitude > 1000 then
+                obj:Destroy()
+            end
+        end
+    end
+end
 
-UIS.InputChanged:Connect(function(input)  
-    if dragging and input == dragInput then  
-        local delta = input.Position - dragStart  
-        MainFrame.Position = UDim2.new(  
-            0, delta.X + MainFrame.Position.X.Offset,  
-            0.5, -125 + delta.Y  
-        )  
-    end  
-end)  
+-- ██████ [MEMORY OPTIMIZER] ██████ --
+local function OptimizeMemory()
+    collectgarbage("setpause", 100)
+    collectgarbage("setstepmul", 5000)
+    game:GetService("ContentProvider"):PreloadAsync({})
+end
 
---====== [FPS GOD BUTTON] ======--  
-local FPSButton = Instance.new("TextButton")  
-FPSButton.Size = UDim2.new(0, 160, 0, 40)  
-FPSButton.Position = UDim2.new(0, 10, 0, 10)  
-FPSButton.Text = "FPS BOOST (1000+)"  
-FPSButton.TextColor3 = Color3.fromRGB(0, 255, 0)  
-FPSButton.BackgroundTransparency = 0.9  
-FPSButton.Parent = MainFrame  
+-- ██████ [GUI BUTTONS] ██████ --
+local buttons = {
+    {
+        Text = "EXTREME FPS",
+        Action = function()
+            FPSLevels[1].Action()
+            OptimizeByDistance()
+        end,
+        Color = Color3.fromRGB(255, 50, 50)
+    },
+    {
+        Text = "SMART OPTIMIZE",
+        Action = function()
+            FPSLevels[2].Action()
+            OptimizeByDistance()
+            OptimizeMemory()
+        end,
+        Color = Color3.fromRGB(50, 255, 50)
+    },
+    {
+        Text = "CLEAN DISTANT",
+        Action = CleanDistantObjects,
+        Color = Color3.fromRGB(50, 50, 255)
+    },
+    {
+        Text = "24H BOOST",
+        Action = function()
+            spawn(function()
+                while true do
+                    OptimizeByDistance()
+                    OptimizeMemory()
+                    task.wait(60 * 60) -- كل ساعة
+                end
+            end)
+        end,
+        Color = Color3.fromRGB(255, 255, 50)
+    }
+}
 
---====== [FPS OPTIMIZATIONS] ======--  
-local function MaxFPS()  
-    pcall(function()  
-        settings().Rendering.QualityLevel = 1  
-        game:GetService("Lighting").GlobalShadows = false  
-        setfpscap(1000)  
-        for _, v in pairs(workspace:GetDescendants()) do  
-            if v:IsA("BasePart") then  
-                v.Material = Enum.Material.Plastic  
-            end  
-        end  
-    end)  
-end  
+-- ██████ [CREATE BUTTONS] ██████ --
+for i, btn in ipairs(buttons) do
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 200, 0, 40)
+    button.Position = UDim2.new(0, 10, 0, 10 + ((i-1) * 50)
+    button.Text = btn.Text
+    button.TextColor3 = btn.Color
+    button.BackgroundTransparency = 0.9
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 12
+    button.Parent = MainFrame
+    
+    button.MouseButton1Click:Connect(function()
+        pcall(btn.Action)
+    end)
+end
 
-FPSButton.MouseButton1Click:Connect(MaxFPS)  
+-- ██████ [FPS COUNTER] ██████ --
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0, 200, 0, 30)
+fpsLabel.Position = UDim2.new(0, 10, 0, 230)
+fpsLabel.Text = "FPS: --"
+fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.Font = Enum.Font.Code
+fpsLabel.TextSize = 14
+fpsLabel.Parent = MainFrame
 
---====== [ANTI-AFK SYSTEM] ======--  
-local AFKButton = Instance.new("TextButton")  
-AFKButton.Size = UDim2.new(0, 160, 0, 40)  
-AFKButton.Position = UDim2.new(0, 10, 0, 60)  
-AFKButton.Text = "ANTI-AFK (ON)"  
-AFKButton.TextColor3 = Color3.fromRGB(255, 50, 50)  
-AFKButton.Parent = MainFrame  
+RunService.Heartbeat:Connect(function()
+    fpsLabel.Text = string.format("FPS: %d", math.floor(1/RunService.Heartbeat:Wait()))
+end)
 
-RunService.Heartbeat:Connect(function()  
-    pcall(function()  
-        Player.Character:SetPrimaryPartCFrame(Player.Character.HumanoidRootPart.CFrame)  
-    end)  
-end)  
+-- ██████ [INITIALIZE] ██████ --
+MainFrame.Parent = GUI
+GUI.Parent = CoreGui
 
---====== [FLY SYSTEM] ======--  
-local FlyButton = Instance.new("TextButton")  
-FlyButton.Size = UDim2.new(0, 160, 0, 40)  
-FlyButton.Position = UDim2.new(0, 10, 0, 110)  
-FlyButton.Text = "FLY MODE (SPACE)"  
-FlyButton.TextColor3 = Color3.fromRGB(50, 50, 255)  
-FlyButton.Parent = MainFrame  
+-- ██████ [AUTO OPTIMIZATION] ██████ --
+spawn(function()
+    while true do
+        OptimizeByDistance()
+        task.wait(30)
+    end
+end)
 
-FlyButton.MouseButton1Click:Connect(function()  
-    loadstring(game:HttpGet("https://pastebin.com/raw/MHE1cbMF"))()  
-end)  
-
---====== [DESTROY BUTTON] ======--  
-local DestroyButton = Instance.new("TextButton")  
-DestroyButton.Size = UDim2.new(0, 160, 0, 40)  
-DestroyButton.Position = UDim2.new(0, 10, 0, 160)  
-DestroyButton.Text = "DESTROY GUI"  
-DestroyButton.TextColor3 = Color3.fromRGB(255, 0, 0)  
-DestroyButton.Parent = MainFrame  
-
-DestroyButton.MouseButton1Click:Connect(function()  
-    GUI:Destroy()  
-end)  
-
---====== [AUTO-SHOW GUI] ======--  
-task.spawn(function()  
-    wait(1)  
-    if not GUI.Enabled then  
-        GUI.Enabled = true  
-    end  
-end)  
-
---====== [KEYBIND TO SHOW] ======--  
-UIS.InputBegan:Connect(function(input)  
-    if input.KeyCode == Enum.KeyCode.F9 then  
-        GUI.Enabled = not GUI.Enabled  
-    end  
-end)  
+-- ██████ [KEYBIND] ██████ --
+UIS.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F10 then
+        GUI.Enabled = not GUI.Enabled
+    end
+end)
