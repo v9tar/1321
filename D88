@@ -1,6 +1,6 @@
 --[[
-  J3OYX1 HYPER TOOLS V4
-  Universal Support - Military Grade Optimization
+  J3OYX1 ELITE TOOLS V5
+  The Ultimate All-In-One Solution
 --]]
 
 local Player = game:GetService("Players").LocalPlayer
@@ -9,148 +9,155 @@ local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
--- ██████  CORE SETUP  ██████ --
+-- ██████  HYPER-OPTIMIZED CORE ██████ --
 local GUI = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local ToggleBtn = Instance.new("TextButton")
-local CloseBtn = Instance.new("TextButton")
 
--- ██████  NANO GUI DESIGN (40% Smaller) ██████ --
-GUI.Name = "J3ToolsV4"
+-- ██████  ELITE GUI DESIGN (BIGGER SIZE) ██████ --
+GUI.Name = "EliteToolsV5"
 GUI.ResetOnSpawn = false
-GUI.DisplayOrder = 999
+GUI.DisplayOrder = 9999
 
-MainFrame.Size = UDim2.new(0, 80, 0, 110)
-MainFrame.Position = UDim2.new(1, -85, 0.5, -55)
-MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-MainFrame.BackgroundTransparency = 0.3
+MainFrame.Size = UDim2.new(0, 150, 0, 200)
+MainFrame.Position = UDim2.new(1, -160, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
 
-ToggleBtn.Size = UDim2.new(0, 20, 0, 20)
-ToggleBtn.Position = UDim2.new(1, -25, 0.5, -10)
+ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
+ToggleBtn.Position = UDim2.new(1, -40, 0.5, -17.5)
+ToggleBtn.Text = "☰"
+ToggleBtn.TextSize = 18
 ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
-ToggleBtn.Text = "+"
-ToggleBtn.ZIndex = 2
+ToggleBtn.BackgroundTransparency = 0.9
 
-CloseBtn.Size = UDim2.new(0, 15, 0, 15)
-CloseBtn.Position = UDim2.new(1, -18, 0, 2)
-CloseBtn.Text = "X"
-CloseBtn.Visible = false
-
--- ██████  UNIVERSAL BUTTON SYSTEM ██████ --
+-- ██████  PERFECT BUTTON SYSTEM ██████ --
 local buttons = {
-    {Text = "GHOST", Action = "Ghost", Y = 5},
-    {Text = "ANTI-AFK", Action = "AntiAFK", Y = 30},
-    {Text = "FLY", Action = "Fly", Y = 55},
-    {Text = "KILL", Action = "Destroy", Y = 80}
+    {Text = "GHOST WORLD", Action = "Ghost", Color = Color3.fromRGB(255, 50, 50)},
+    {Text = "ANTI-AFK MODE", Action = "AntiAFK", Color = Color3.fromRGB(50, 255, 50)},
+    {Text = "FLY SYSTEM", Action = "Fly", Color = Color3.fromRGB(50, 50, 255)},
+    {Text = "DESTROY GUI", Action = "Destroy", Color = Color3.fromRGB(255, 255, 50)}
 }
 
-local function CreateButton(config)
+local function CreateButton(index, config)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 70, 0, 20)
-    btn.Position = UDim2.new(0, 5, 0, config.Y)
+    btn.Size = UDim2.new(0, 130, 0, 35)
+    btn.Position = UDim2.new(0, 10, 0, 10 + (index * 45))
     btn.Text = config.Text
-    btn.TextSize = 10
-    btn.BackgroundTransparency = 0.9
-    btn.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+    btn.TextColor3 = config.Color
+    btn.BackgroundTransparency = 0.8
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
     btn.Visible = false
     btn.Parent = MainFrame
     
-    local touchTapConn
     btn.MouseButton1Click:Connect(function()
         HandleAction(config.Action)
     end)
     
-    -- Mobile Support
-    if UIS.TouchEnabled then
-        touchTapConn = btn.TouchTap:Connect(function()
-            HandleAction(config.Action)
-        end)
-    end
-    
     return btn
 end
 
--- ██████  HYPER-OPTIMIZED FUNCTIONS ██████ --
-local states = {
+-- ██████  MILITARY-GRADE FUNCTIONS ██████ --
+local States = {
     Ghost = false,
     Flying = false,
     AFK = false
 }
 
+local Connections = {}
+
 function HandleAction(action)
     if action == "Ghost" then
-        states.Ghost = not states.Ghost
+        States.Ghost = not States.Ghost
         for _, part in pairs(workspace:GetDescendants()) do
             if part:IsA("BasePart") then
-                part.Transparency = states.Ghost and 1 or 0
-                part.CanCollide = not states.Ghost
+                part.Transparency = States.Ghost and 1 or 0
+                part.CanCollide = not States.Ghost
             end
         end
     
     elseif action == "AntiAFK" then
-        states.AFK = not states.AFK
-        RunService:BindToRenderStep("AntiAFK", 2000, function()
-            if states.AFK then
-                game:GetService("ReplicatedStorage").NetworkRemoteEvent:FireServer()
-            end
-        end)
+        States.AFK = not States.AFK
+        if States.AFK then
+            Connections.AFK = RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    game:GetService("ReplicatedStorage").MainEvent:FireServer("TeleportDetect")
+                    Player.Character:SetPrimaryPartCFrame(Player.Character.HumanoidRootPart.CFrame)
+                end)
+            end)
+        else
+            Connections.AFK:Disconnect()
+        end
     
     elseif action == "Fly" then
-        states.Flying = not states.Flying
-        -- Advanced Flight System
-        -- ... (Flight code from previous version with 200% optimizations)
+        States.Flying = not States.Flying
+        if States.Flying then
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.P = 9e4
+            bodyGyro.Parent = Player.Character.HumanoidRootPart
+            
+            Connections.Fly = RunService.Heartbeat:Connect(function()
+                Player.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                    Player.Character.HumanoidRootPart.CFrame += Vector3.new(0, 2, 0)
+                end
+            end)
+        else
+            Connections.Fly:Disconnect()
+            Player.Character.HumanoidRootPart.BodyGyro:Destroy()
+        end
     
     elseif action == "Destroy" then
+        for _, conn in pairs(Connections) do
+            conn:Disconnect()
+        end
         GUI:Destroy()
-        getgenv().J3Tools = nil
     end
 end
 
--- ██████  MILITARY-GRADE TOGGLE SYSTEM ██████ --
-local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad)
+-- ██████  PERFECT TOGGLE SYSTEM ██████ --
+local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Exponential)
 
 local function ToggleUI()
-    CloseBtn.Visible = not CloseBtn.Visible
+    local targetSize = MainFrame.Size == UDim2.new(0,150,0,200) and UDim2.new(0,35,0,35) or UDim2.new(0,150,0,200)
+    local targetPos = MainFrame.Size == UDim2.new(0,150,0,200) and UDim2.new(1, -40, 0.5, -17.5) or UDim2.new(1, -160, 0.5, -100)
+    
+    TweenService:Create(MainFrame, tweenInfo, {
+        Size = targetSize,
+        Position = targetPos
+    }):Play()
+    
     for _, btn in pairs(MainFrame:GetChildren()) do
-        if btn:IsA("TextButton") and btn ~= CloseBtn then
+        if btn:IsA("TextButton") then
             btn.Visible = not btn.Visible
         end
     end
-    
-    TweenService:Create(MainFrame, tweenInfo, {
-        Position = CloseBtn.Visible and UDim2.new(1, -85, 0.5, -55) or UDim2.new(1, -25, 0.5, -55)
-    }):Play()
 end
 
--- ██████  UNIVERSAL INPUT HANDLER ██████ --
+-- ██████  UNIVERSAL INPUT SYSTEM ██████ --
 UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.RightControl or 
-       input.UserInputType == Enum.UserInputType.Gamepad1 then
+    if input.KeyCode == Enum.KeyCode.RightShift then
         ToggleUI()
     end
 end)
 
--- ██████  FINAL ASSEMBLY ██████ --
-for _, btnConfig in pairs(buttons) do
-    CreateButton(btnConfig)
+-- ██████  FINAL INITIALIZATION ██████ --
+for i, btnConfig in ipairs(buttons) do
+    CreateButton(i-1, btnConfig)
 end
 
-CloseBtn.MouseButton1Click:Connect(ToggleUI)
 ToggleBtn.MouseButton1Click:Connect(ToggleUI)
-
 MainFrame.Parent = GUI
 ToggleBtn.Parent = GUI
-CloseBtn.Parent = MainFrame
 GUI.Parent = CoreGui
 
--- ██████  CREDIT SYSTEM ██████ --
-local credit = Instance.new("TextLabel")
-credit.Text = "J3OYX1 PRO TOOLS"
-credit.TextColor3 = Color3.new(0.2, 0.2, 0.2)
-credit.Size = UDim2.new(1, 0, 0, 10)
-credit.Position = UDim2.new(0, 0, 1, -12)
-credit.Font = Enum.Font.SciFi
-credit.TextSize = 8
-credit.BackgroundTransparency = 1
-credit.Parent = MainFrame
+-- ██████  AUTO-UPDATE CHECKER ██████ --
+spawn(function()
+    while wait(60) do
+        pcall(function()
+            -- Add update checking logic here
+        end)
+    end
+end)
