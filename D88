@@ -1,5 +1,5 @@
--- Ultimate Fruit Trade Controller v17.0 FINAL
--- النسخة النهائية مع جميع الإصلاحات
+-- Ultimate Fruit Trade Controller v1.6
+-- النسخة النهائية مع إصلاح جميع المشاكل
 
 local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -11,9 +11,11 @@ local HS = game:GetService("HttpService")
 local function SecureFunction(func)
     return function(...)
         local args = {...}
-        local success, result = pcall(func, unpack(args))
+        local success, result = pcall(function()
+            return func(unpack(args))
+        end)
         if not success then
-            warn("حدث خطأ:", result)
+            warn("خطأ في النظام:", result)
         end
         return success, result
     end
@@ -21,79 +23,91 @@ end
 
 --[[ إنشاء الواجهة ]]
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "TradeControl_"..HS:GenerateGUID(false)
+GUI.Name = "FruitControl_"..HS:GenerateGUID(false)
 GUI.ResetOnSpawn = false
 GUI.Parent = game:GetService("CoreGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 300, 0, 250)
-MainFrame.Position = UDim2.new(1, -310, 0.5, -125) -- الجانب الأيمن
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Size = UDim2.new(0, 320, 0, 250)
+MainFrame.Position = UDim2.new(1, -330, 0.5, -125) -- الجانب الأيمن من الشاشة
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Active = true
 MainFrame.Parent = GUI
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
 -- شريط العنوان
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 30)
-TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 TitleBar.Parent = MainFrame
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Text = " Ultimate Controller v17.0"
-TitleText.TextColor3 = Color3.fromRGB(200, 200, 200)
+TitleText.Text = " Fruit Controller v1.6 "
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Size = UDim2.new(0.7, 0, 1, 0)
 TitleText.Position = UDim2.new(0.05, 0, 0, 0)
 TitleText.Font = Enum.Font.GothamBold
+TitleText.TextSize = 14
 TitleText.Parent = TitleBar
 
 -- إطار المحتوى
 local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, -20, 1, -50)
-ContentFrame.Position = UDim2.new(0, 10, 0, 40)
+ContentFrame.Size = UDim2.new(1, -20, 1, -60)
+ContentFrame.Position = UDim2.new(0, 10, 0, 45)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
 -- عناصر التحكم
 local PlayerBox = Instance.new("TextBox")
-PlayerBox.PlaceholderText = "اسم اللـاعـب (3+ أحرف)"
-PlayerBox.Size = UDim2.new(1, 0, 0, 30)
+PlayerBox.PlaceholderText = "اسم اللاعب (3+ أحرف)"
+PlayerBox.Size = UDim2.new(1, 0, 0, 35)
 PlayerBox.Position = UDim2.new(0, 0, 0, 10)
 PlayerBox.ClearTextOnFocus = false
+PlayerBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 PlayerBox.Parent = ContentFrame
 
 local ControlBtn = Instance.new("TextButton")
 ControlBtn.Text = "بدء التحكم"
 ControlBtn.Size = UDim2.new(1, 0, 0, 35)
-ControlBtn.Position = UDim2.new(0, 0, 0, 50)
+ControlBtn.Position = UDim2.new(0, 0, 0, 55)
+ControlBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+ControlBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ControlBtn.Parent = ContentFrame
 
 local JumpToggleHim = Instance.new("TextButton")
-JumpToggleHim.Text = "تعطيل قفزه 🔒"
+JumpToggleHim.Text = "تعطيل قفزه (OFF)"
 JumpToggleHim.Size = UDim2.new(0.48, 0, 0, 35)
-JumpToggleHim.Position = UDim2.new(0, 0, 0, 95)
+JumpToggleHim.Position = UDim2.new(0, 0, 0, 100)
+JumpToggleHim.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+JumpToggleHim.TextColor3 = Color3.fromRGB(255, 255, 255)
 JumpToggleHim.Parent = ContentFrame
 
 local JumpToggleMe = Instance.new("TextButton")
-JumpToggleMe.Text = "تعطيل قفزي 🔓"
+JumpToggleMe.Text = "تعطيل قفزي (OFF)"
 JumpToggleMe.Size = UDim2.new(0.48, 0, 0, 35)
-JumpToggleMe.Position = UDim2.new(0.52, 0, 0, 95)
+JumpToggleMe.Position = UDim2.new(0.52, 0, 0, 100)
+JumpToggleMe.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+JumpToggleMe.TextColor3 = Color3.fromRGB(255, 255, 255)
 JumpToggleMe.Parent = ContentFrame
 
 local AcceptHimBtn = Instance.new("TextButton")
-AcceptHimBtn.Text = "إجبار القبول ✅"
+AcceptHimBtn.Text = "إجبار القبول"
 AcceptHimBtn.Size = UDim2.new(1, 0, 0, 35)
-AcceptHimBtn.Position = UDim2.new(0, 0, 0, 140)
+AcceptHimBtn.Position = UDim2.new(0, 0, 0, 145)
+AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(0, 70, 0)
+AcceptHimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AcceptHimBtn.Parent = ContentFrame
 
 --[[ الأنظمة الأساسية ]]
 local ControlledPlayer = nil
 local Debounce = false
 
+-- نظام البحث عن اللاعب
 local function FindPlayer(name)
     name = name:lower():gsub("[^%w]", ""):sub(1, 20)
     if #name < 3 then return nil end
@@ -116,51 +130,79 @@ local function FindPlayer(name)
     return closestPlayer
 end
 
-local ControlSystem = {
-    ToggleJump = SecureFunction(function(target, state)
+-- نظام التحكم في القفز (إصلاح كامل)
+local JumpControl = {
+    -- جدول لتخزين الإعدادات الأصلية
+    OriginalSettings = {},
+    
+    -- دالة تعطيل/تمكين القفز
+    Toggle = SecureFunction(function(target, state)
         if not target or not target.Character then return false end
         
         local humanoid = target.Character:FindFirstChildOfClass("Humanoid")
         if not humanoid then return false end
         
+        -- حفظ الإعدادات الأصلية عند التعطيل الأول
+        if state and not JumpControl.OriginalSettings[target] then
+            JumpControl.OriginalSettings[target] = {
+                JumpPower = humanoid.JumpPower,
+                WalkSpeed = humanoid.WalkSpeed
+            }
+        end
+        
+        -- تطبيق التغييرات
         if state then
-            humanoid:SetAttribute("OriginalJump", humanoid.JumpPower)
             humanoid.JumpPower = 0
+            humanoid.WalkSpeed = 16 -- إضافة تحكم في سرعة المشي
         else
-            humanoid.JumpPower = humanoid:GetAttribute("OriginalJump") or 50
+            local original = JumpControl.OriginalSettings[target] or {JumpPower = 50, WalkSpeed = 16}
+            humanoid.JumpPower = original.JumpPower
+            humanoid.WalkSpeed = original.WalkSpeed
         end
         
         return true
-    end),
-    
-    ForceAcceptHim = SecureFunction(function()
-        if not ControlledPlayer then return false end
+    end)
+}
+
+-- نظام القبول الإجباري (إصلاح كامل)
+local AcceptControl = {
+    ForceAccept = SecureFunction(function(target)
+        if not target then return false end
         
-        -- نظام متقدم للقبول الإجباري
-        local success = false
+        -- البحث في ReplicatedStorage أولاً
         for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
             if remote:IsA("RemoteEvent") and remote.Name:lower():find("accept") then
-                fireclickdetector(remote)
                 remote:FireServer(true)
-                success = true
+                return true
             end
         end
-        return success
+        
+        -- البحث في CoreGui إذا لم يتم العثور
+        for _, button in pairs(game:GetService("CoreGui"):GetDescendants()) do
+            if button:IsA("TextButton") and button.Text:lower():find("accept") then
+                for _, connection in pairs(getconnections(button.MouseButton1Click)) do
+                    connection:Fire()
+                    return true
+                end
+            end
+        end
+        
+        return false
     end)
 }
 
 --[[ نظام السحب المتقدم ]]
-local dragging = false
-local dragStart = Vector2.new()
-local frameStart = Vector2.new()
+local dragging, dragStart, frameStart = false, nil, nil
 
 local function IsEmptySpace(mousePos)
     local absPos = MainFrame.AbsolutePosition
     local absSize = MainFrame.AbsoluteSize
     
+    -- التحقق من النقر داخل الإطار
     if mousePos.X < absPos.X or mousePos.X > absPos.X + absSize.X then return false end
     if mousePos.Y < absPos.Y or mousePos.Y > absPos.Y + absSize.Y then return false end
     
+    -- التحقق من عدم النقر على عناصر التحكم
     for _, child in ipairs(MainFrame:GetDescendants()) do
         if child:IsA("GuiButton") or child:IsA("TextBox") then
             local cPos = child.AbsolutePosition
@@ -179,8 +221,8 @@ UIS.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if IsEmptySpace(input.Position) then
             dragging = true
-            dragStart = Vector2.new(input.Position.X, input.Position.Y)
-            frameStart = Vector2.new(MainFrame.Position.X.Offset, MainFrame.Position.Y.Offset)
+            dragStart = input.Position
+            frameStart = MainFrame.Position
             
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
@@ -193,8 +235,13 @@ end)
 
 UIS.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = Vector2.new(input.Position.X, input.Position.Y) - dragStart
-        MainFrame.Position = UDim2.new(0, frameStart.X + delta.X, 0, frameStart.Y + delta.Y)
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            frameStart.X.Scale,
+            frameStart.X.Offset + delta.X,
+            frameStart.Y.Scale,
+            frameStart.Y.Offset + delta.Y
+        )
     end
 end)
 
@@ -217,35 +264,51 @@ ControlBtn.MouseButton1Click:Connect(function()
 end)
 
 JumpToggleHim.MouseButton1Click:Connect(function()
-    if not ControlledPlayer then return end
+    if not ControlledPlayer then 
+        warn("الرجاء تحديد لاعب أولاً!")
+        return 
+    end
     
-    local newState = JumpToggleHim.Text:find("🔒")
-    local success = ControlSystem.ToggleJump(ControlledPlayer, newState)
+    local newState = not JumpToggleHim.Text:find("ON")
+    local success = JumpControl.Toggle(ControlledPlayer, newState)
     
     if success then
-        JumpToggleHim.Text = newState and "تمكين قفزه 🔓" or "تعطيل قفزه 🔒"
+        JumpToggleHim.Text = newState and "تعطيل قفزه (ON)" or "تعطيل قفزه (OFF)"
+        JumpToggleHim.BackgroundColor3 = newState and Color3.fromRGB(0, 70, 0) or Color3.fromRGB(70, 0, 0)
     else
         warn("فشل في التحكم بقفز اللاعب!")
     end
 end)
 
 JumpToggleMe.MouseButton1Click:Connect(function()
-    local newState = JumpToggleMe.Text:find("🔒")
-    local success = ControlSystem.ToggleJump(Player, newState)
+    local newState = not JumpToggleMe.Text:find("ON")
+    local success = JumpControl.Toggle(Player, newState)
     
     if success then
-        JumpToggleMe.Text = newState and "تمكين قفزي 🔓" or "تعطيل قفزي 🔒"
+        JumpToggleMe.Text = newState and "تعطيل قفزي (ON)" or "تعطيل قفزي (OFF)"
+        JumpToggleMe.BackgroundColor3 = newState and Color3.fromRGB(0, 70, 0) or Color3.fromRGB(70, 0, 0)
     else
         warn("فشل في التحكم بقفزك!")
     end
 end)
 
 AcceptHimBtn.MouseButton1Click:Connect(function()
-    local success = ControlSystem.ForceAcceptHim()
+    if not ControlledPlayer then 
+        warn("الرجاء تحديد لاعب أولاً!")
+        return 
+    end
+    
+    local success = AcceptControl.ForceAccept(ControlledPlayer)
     if success then
-        warn("تم إجبار اللاعب على القبول!")
+        warn("تم إرسال طلب القبول بنجاح!")
+        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+        wait(0.5)
+        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(0, 70, 0)
     else
-        warn("فشل في إجبار القبول!")
+        warn("فشل في إرسال طلب القبول!")
+        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+        wait(0.5)
+        AcceptHimBtn.BackgroundColor3 = Color3.fromRGB(0, 70, 0)
     end
 end)
 
@@ -257,4 +320,5 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
-warn("تم تحميل السكربت بنجاح! 🚀")
+-- إظهار رسالة التحميل
+warn("تم تحميل سكربت تحكم الفواكه بنجاح! v1.6")
