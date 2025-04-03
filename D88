@@ -1,110 +1,113 @@
 --[[
-  السكربت يعمل على معظم المنفذين (Executors)
-  قم بتشغيله بواسطة زر الحق (Execute)
+  سكربت J3OYX1 Tools V2
+  يعمل على جميع المنفذين مع واجهة ذكية
 --]]
 
 local Player = game:GetService("Players").LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
 
--- إنشاء واجهة المستخدم الرئيسية
-local MainGUI = Instance.new("ScreenGui")
+-- إعدادات الواجهة الأساسية
+local GUI = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
-local ToggleMap = Instance.new("TextButton")
-local AFKButton = Instance.new("TextButton")
-local ExtraBtn1 = Instance.new("TextButton")
-local ToggleButtons = Instance.new("TextButton")
+local ToggleBtn = Instance.new("TextButton")
 
--- إعدادات الواجهة
-MainGUI.Name = "DeltaTools"
-MainGUI.ResetOnSpawn = false
+-- تصميم الواجهة المدمجة
+GUI.Name = "J3Tools"
+GUI.ResetOnSpawn = false
 
-MainFrame.Size = UDim2.new(0, 200, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
-MainFrame.BackgroundTransparency = 0.5
+MainFrame.Size = UDim2.new(0, 200, 0, 220)
+MainFrame.Position = UDim2.new(1, -210, 0.5, -110)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 0
 
-ToggleMap.Name = "ToggleMap"
-ToggleMap.Size = UDim2.new(0, 180, 0, 40)
-ToggleMap.Position = UDim2.new(0, 10, 0, 10)
-ToggleMap.Text = "إخفاء الماب"
+ToggleBtn.Size = UDim2.new(0, 40, 0, 40)
+ToggleBtn.Position = UDim2.new(1, -45, 0.5, -20)
+ToggleBtn.Text = "☰"
+ToggleBtn.ZIndex = 2
 
-AFKButton.Name = "AFKButton"
-AFKButton.Size = UDim2.new(0, 180, 0, 40)
-AFKButton.Position = UDim2.new(0, 10, 0, 60)
-AFKButton.Text = "وضع AFK"
+-- أنشاء الأزرار
+local buttons = {
+    {Name = "HideMap", Text = "إخفاء الماب", YPos = 10},
+    {Name = "AFKMode", Text = "وضع AFK", YPos = 50},
+    {Name = "Custom1", Text = "إجراء سري", YPos = 90},
+    {Name = "Members", Text = "قائمة الأعضاء", YPos = 130},
+}
 
-ExtraBtn1.Name = "ExtraBtn1"
-ExtraBtn1.Size = UDim2.new(0, 180, 0, 40)
-ExtraBtn1.Position = UDim2.new(0, 10, 0, 110)
-ExtraBtn1.Text = "زر إضافي 1"
-
-ToggleButtons.Name = "ToggleButtons"
-ToggleButtons.Size = UDim2.new(0, 180, 0, 40)
-ToggleButtons.Position = UDim2.new(0, 10, 0, 160)
-ToggleButtons.Text = "إخفاء الأزرار"
-
--- إضافة العناصر إلى الواجهة
-MainFrame.Parent = MainGUI
-ToggleMap.Parent = MainFrame
-AFKButton.Parent = MainFrame
-ExtraBtn1.Parent = MainFrame
-ToggleButtons.Parent = MainFrame
-MainGUI.Parent = PlayerGui
-
--- متغيرات التحكم
-local MapHidden = false
-local ButtonsVisible = true
-local AFKMode = false
-
--- وظيفة إخفاء/إظهار الماب
-local function ToggleMapVisibility()
-    MapHidden = not MapHidden
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            obj.Transparency = MapHidden and 1 or 0
-            obj.CanCollide = not MapHidden
-        end
-    end
+local createdButtons = {}
+for _, btn in ipairs(buttons) do
+    local newBtn = Instance.new("TextButton")
+    newBtn.Name = btn.Name
+    newBtn.Size = UDim2.new(0, 180, 0, 30)
+    newBtn.Position = UDim2.new(0, 10, 0, btn.YPos)
+    newBtn.Text = btn.Text
+    newBtn.TextSize = 14
+    newBtn.BackgroundTransparency = 0.7
+    newBtn.Parent = MainFrame
+    table.insert(createdButtons, newBtn)
 end
 
--- وظيفة AFK
-local function ToggleAFK()
-    AFKMode = not AFKMode
-    local Root = Player.Character:FindFirstChild("HumanoidRootPart")
-    if Root then
-        while AFKMode do
-            wait(1)
-            Root.CFrame = CFrame.new(0, 10000, 0)
-        end
-    end
+-- إضافة حقوق المطور
+local Credit = Instance.new("TextLabel")
+Credit.Text = "by: J3OYX1"
+Credit.TextColor3 = Color3.fromRGB(150, 150, 150)
+Credit.Size = UDim2.new(1, 0, 0, 20)
+Credit.Position = UDim2.new(0, 0, 1, -25)
+Credit.BackgroundTransparency = 1
+Credit.Font = Enum.Font.SciFi
+Credit.Parent = MainFrame
+
+-- إعداد الحركات
+local isMenuOpen = false
+local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad)
+
+local function ToggleMenu()
+    isMenuOpen = not isMenuOpen
+    local targetPosition = isMenuOpen and UDim2.new(1, -210, 0.5, -110) or UDim2.new(1, -50, 0.5, -110)
+    TweenService:Create(MainFrame, tweenInfo, {Position = targetPosition}):Play()
 end
 
--- وظيفة إخفاء الأزرار
-local function ToggleGUIButtons()
-    ButtonsVisible = not ButtonsVisible
-    for _, btn in pairs(MainFrame:GetChildren()) do
-        if btn:IsA("TextButton") then
-            btn.Visible = ButtonsVisible
+-- وظائف الأزرار الأساسية
+createdButtons[1].MouseButton1Click:Connect(function()
+    for _, part in ipairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Transparency = part.Transparency == 1 and 0 or 1
+            part.CanCollide = not part.CanCollide
         end
     end
-    ToggleButtons.Visible = true -- الإبقاء على زر التبديل مرئي
-end
-
--- إعداد الأحداث
-ToggleMap.MouseButton1Click:Connect(ToggleMapVisibility)
-AFKButton.MouseButton1Click:Connect(ToggleAFK)
-ToggleButtons.MouseButton1Click:Connect(ToggleGUIButtons)
-
--- إضافة زر إضافي مخصص (يمكنك تعديله)
-ExtraBtn1.MouseButton1Click:Connect(function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "زر مخصص",
-        Text = "هذا زر إضافي يمكنك برمجته!"
-    })
 end)
 
--- إخفاء الواجهة عند التحميل (استخدم INSERT لاستعادتها)
+createdButtons[2].MouseButton1Click:Connect(function()
+    local humanoid = Player.Character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 0
+        wait(2)
+        humanoid.WalkSpeed = 16
+    end
+end)
+
+-- زر الإجراء السري (يمكن تخصيصه)
+createdButtons[3].MouseButton1Click:Connect(function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+end)
+
+-- قائمة الأعضاء
+createdButtons[4].MouseButton1Click:Connect(function()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        print("عضو: "..player.Name)
+    end
+end)
+
+-- توصيل الأحداث
+ToggleBtn.MouseButton1Click:Connect(ToggleMenu)
+
+-- التهيئة النهائية
+MainFrame.Parent = GUI
+ToggleBtn.Parent = GUI
+GUI.Parent = Player:WaitForChild("PlayerGui")
+
+-- إختصار لوحة المفاتيح (F للفتح/القفل)
 game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Insert then
-        MainGUI.Enabled = not MainGUI.Enabled
+    if input.KeyCode == Enum.KeyCode.F then
+        ToggleMenu()
     end
 end)
