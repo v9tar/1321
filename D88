@@ -1,205 +1,189 @@
---[[
-  سكربت D88 المتميز - النسخة العربية
-  المميزات:
-  1. واجهة عربية 100% بتصميم مظلم
-  2. حجم مضغوط مع إمكانية التنقل
-  3. تحكم كامل في المابات
-  4. عرض أداء اللعبة (FPS/Ping)
-  5. نظام تبرعات مدمج
-]]
-
+-- D88 سكربت بواسطة j3oyx1
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
--- النصوص العربية
-local ArabicText = {
-    MainTitle = "سكربت D88 المطور",
-    MapControl = "التحكم في المابات",
-    DonateTitle = "ادعم المطور",
-    Donate5 = "تبرع 5 ريال 💙",
-    Donate10 = "تبرع 10 ريال 💎",
-    CloseUI = "إغلاق القائمة ▲",
-    OpenUI = "فتح القائمة ▼",
-    Performance = "أداء اللعبة",
-    FPS = "معدل الإطارات: ",
-    Ping = "سرعة الاتصال: ",
-    Loading = "جاري التحميل..."
-}
-
--- إنشاء واجهة مظلمة صغيرة
-local Gui = Instance.new("ScreenGui")
-Gui.Name = "D88_Arabic"
-Gui.Parent = game:GetService("CoreGui")
+-- إنشاء الواجهة الرئيسية
+local GUI = Instance.new("ScreenGui")
+GUI.Name = "D88"
+GUI.ResetOnSpawn = false
+GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = Gui
-MainFrame.Size = UDim2.new(0, 280, 0, 350) -- حجم أصغر
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -175)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20) -- لون أغمق
-MainFrame.BackgroundTransparency = 0.05
-MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.Size = UDim2.new(0, 120, 0, 35)
+MainFrame.Position = UDim2.new(0.5, -60, 1, -160)
+MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
 
--- زوايا مدورة
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
-UICorner.Parent = MainFrame
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(1, 0, 0, 35)
+ToggleButton.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+ToggleButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleButton.Text = "القائمة الرئيسية ▼"
+ToggleButton.Font = Enum.Font.GothamBold
 
--- إطار الظل
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(50, 50, 80)
-UIStroke.Thickness = 2
-UIStroke.Parent = MainFrame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(1, 0, 0, 0)
+ContentFrame.Position = UDim2.new(0, 0, 0, 35)
+ContentFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
 
--- العناصر الرئيسية
-local Title = Instance.new("TextLabel")
-Title.Text = ArabicText.MainTitle
-Title.Size = UDim2.new(0, 250, 0, 40)
-Title.Position = UDim2.new(0.5, -125, 0, 5)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.BackgroundTransparency = 1
-Title.TextSize = 18
-Title.Parent = MainFrame
+-- الإحصائيات والاعتمادات
+local StatsLabel = Instance.new("TextLabel")
+StatsLabel.Size = UDim2.new(1, 0, 0, 30)
+StatsLabel.BackgroundTransparency = 1
+StatsLabel.TextColor3 = Color3.new(1, 1, 1)
+StatsLabel.Text = "البينج: -- | الإطارات: --"
+StatsLabel.Font = Enum.Font.Gotham
 
--- زر التحكم في المابات (مصغر)
-local MapControlBtn = Instance.new("TextButton")
-MapControlBtn.Text = ArabicText.MapControl
-MapControlBtn.Size = UDim2.new(0, 240, 0, 45) -- حجم أصغر
-MapControlBtn.Position = UDim2.new(0.5, -120, 0.15, 0)
-MapControlBtn.BackgroundColor3 = Color3.fromRGB(30, 80, 150)
-MapControlBtn.TextColor3 = Color3.new(1, 1, 1)
-MapControlBtn.Font = Enum.Font.GothamBold
-MapControlBtn.TextSize = 14
-MapControlBtn.Parent = MainFrame
+local CreditLabel = Instance.new("TextLabel")
+CreditLabel.Size = UDim2.new(1, 0, 0, 20)
+CreditLabel.Position = UDim2.new(0, 0, 1, -20)
+CreditLabel.BackgroundTransparency = 1
+CreditLabel.TextColor3 = Color3.new(1, 1, 1)
+CreditLabel.Text = "تم التطوير بواسطة j3oyx1"
+CreditLabel.Font = Enum.Font.Gotham
 
--- قسم التبرعات (مصغر)
-local DonateLabel = Instance.new("TextLabel")
-DonateLabel.Text = ArabicText.DonateTitle
-DonateLabel.Size = UDim2.new(0, 240, 0, 25)
-DonateLabel.Position = UDim2.new(0.5, -120, 0.45, 0)
-DonateLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-DonateLabel.Font = Enum.Font.Gotham
-DonateLabel.BackgroundTransparency = 1
-DonateLabel.TextSize = 13
-DonateLabel.Parent = MainFrame
+-- إعدادات التخزين
+local HiddenParts = {}
+local HiddenPlayers = {}
 
-local Donate5Btn = Instance.new("TextButton")
-Donate5Btn.Text = ArabicText.Donate5
-Donate5Btn.Size = UDim2.new(0, 110, 0, 40) -- حجم أصغر
-Donate5Btn.Position = UDim2.new(0.3, -55, 0.55, 0)
-Donate5Btn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
-Donate5Btn.TextColor3 = Color3.new(1, 1, 1)
-Donate5Btn.Font = Enum.Font.GothamBold
-Donate5Btn.TextSize = 12
-Donate5Btn.Parent = MainFrame
+-- الأزرار المخصصة
+local Buttons = {
+    {"إخفاء البلوكات", function()
+        for _, part in ipairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name == "Block" then
+                if part.Transparency == 1 then
+                    part.Transparency = 0
+                else
+                    part.Transparency = 1
+                    table.insert(HiddenParts, part)
+                end
+            end
+        end
+    end},
+    
+    {"إخفاء اللاعبين", function()
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local char = player.Character
+                if char:FindFirstChild("HumanoidRootPart") then
+                    if char.HumanoidRootPart.Transparency == 1 then
+                        char.HumanoidRootPart.Transparency = 0
+                    else
+                        char.HumanoidRootPart.Transparency = 1
+                        table.insert(HiddenPlayers, char)
+                    end
+                end
+            end
+        end
+    end},
+    
+    {"إخفاء القائمة", function()
+        GUI.Enabled = not GUI.Enabled
+    end},
+    
+    {"إخفاء الكل", function()
+        -- تفعيل جميع إخفاءات
+        fireclickdetector(ToggleButton)
+        Buttons[1][2]()
+        Buttons[2][2]()
+    end},
+    
+    {"وضع AFK", function()
+        LocalPlayer.Idled:Connect(function()
+            game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        end)
+    end}
+}
 
-local Donate10Btn = Instance.new("TextButton")
-Donate10Btn.Text = ArabicText.Donate10
-Donate10Btn.Size = UDim2.new(0, 110, 0, 40) -- حجم أصغر
-Donate10Btn.Position = UDim2.new(0.7, -55, 0.55, 0)
-Donate10Btn.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
-Donate10Btn.TextColor3 = Color3.new(1, 1, 1)
-Donate10Btn.Font = Enum.Font.GothamBold
-Donate10Btn.TextSize = 12
-Donate10Btn.Parent = MainFrame
-
--- قسم الأداء (مصغر)
-local PerfLabel = Instance.new("TextLabel")
-PerfLabel.Text = ArabicText.Performance
-PerfLabel.Size = UDim2.new(0, 240, 0, 20)
-PerfLabel.Position = UDim2.new(0.5, -120, 0.75, 0)
-PerfLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-PerfLabel.Font = Enum.Font.Gotham
-PerfLabel.BackgroundTransparency = 1
-PerfLabel.TextSize = 12
-PerfLabel.Parent = MainFrame
-
-local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Text = ArabicText.FPS .. "0"
-FPSLabel.Size = UDim2.new(0, 110, 0, 25)
-FPSLabel.Position = UDim2.new(0.3, -55, 0.82, 0)
-FPSLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-FPSLabel.Font = Enum.Font.GothamBold
-FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextXAlignment = Enum.TextXAlignment.Left
-FPSLabel.TextSize = 12
-FPSLabel.Parent = MainFrame
-
-local PingLabel = Instance.new("TextLabel")
-PingLabel.Text = ArabicText.Ping .. "0ms"
-PingLabel.Size = UDim2.new(0, 110, 0, 25)
-PingLabel.Position = UDim2.new(0.7, -55, 0.82, 0)
-PingLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-PingLabel.Font = Enum.Font.GothamBold
-PingLabel.BackgroundTransparency = 1
-PingLabel.TextXAlignment = Enum.TextXAlignment.Left
-PingLabel.TextSize = 12
-PingLabel.Parent = MainFrame
-
--- زر التنقل الذكي
-local ToggleUI = Instance.new("TextButton")
-ToggleUI.Name = "ToggleUI"
-ToggleUI.Size = UDim2.new(0, 120, 0, 30) -- حجم أصغر
-ToggleUI.Position = UDim2.new(0.5, -60, 1, -40)
-ToggleUI.Text = ArabicText.CloseUI
-ToggleUI.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-ToggleUI.TextColor3 = Color3.new(1, 1, 1)
-ToggleUI.Font = Enum.Font.GothamBold
-ToggleUI.TextSize = 12
-ToggleUI.Parent = Gui
-
--- تأثيرات التمرير
-local function ButtonHoverEffect(btn)
-    btn.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = 0.2}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = 0}):Play()
-    end)
+-- نظام إنشاء الأزرار
+local function CreateButton(text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 35)
+    btn.Position = UDim2.new(0, 5, 0, 0)
+    btn.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Text = text
+    btn.Font = Enum.Font.Gotham
+    btn.MouseButton1Click:Connect(callback)
+    return btn
 end
 
--- تطبيق التأثير على الأزرار
-for _, btn in ipairs(MainFrame:GetChildren()) do
-    if btn:IsA("TextButton") then
-        ButtonHoverEffect(btn)
+-- بناء الواجهة
+ToggleButton.Parent = MainFrame
+ContentFrame.Parent = MainFrame
+StatsLabel.Parent = ContentFrame
+CreditLabel.Parent = ContentFrame
+
+local ButtonLayout = Instance.new("UIListLayout")
+ButtonLayout.Padding = UDim.new(0, 5)
+ButtonLayout.Parent = ContentFrame
+
+for _, btnData in ipairs(Buttons) do
+    CreateButton(btnData[1], btnData[2]).Parent = ContentFrame
+end
+
+MainFrame.Parent = GUI
+GUI.Parent = game:GetService("CoreGui")
+
+-- نظام السحب والإفلات
+local dragging, dragInput, dragStart, startPos
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
-end
-ButtonHoverEffect(ToggleUI)
+end)
 
--- تحديث أداء اللعبة
-local function UpdatePerformance()
-    local fps = math.floor(1 / RunService.RenderStepped:Wait())
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale, 
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- نظام التوسيع والطي
+local isExpanded = false
+ToggleButton.MouseButton1Click:Connect(function()
+    isExpanded = not isExpanded
+    ContentFrame.Size = UDim2.new(1, 0, 0, isExpanded and 250 or 0)
+    ToggleButton.Text = isExpanded and "القائمة الرئيسية ▲" or "القائمة الرئيسية ▼"
+end)
+
+-- نظام مراقبة الأداء
+RunService.Heartbeat:Connect(function()
     local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-    
-    FPSLabel.Text = ArabicText.FPS .. fps
-    PingLabel.Text = ArabicText.Ping .. ping .. "ms"
-    
-    -- تغيير ألوان حسب الأداء
-    FPSLabel.TextColor3 = fps < 30 and Color3.fromRGB(255, 50, 50) or fps < 60 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 255, 0)
-    PingLabel.TextColor3 = ping > 300 and Color3.fromRGB(255, 50, 50) or ping > 150 and Color3.fromRGB(255, 165, 0) or Color3.fromRGB(0, 200, 255)
-end
+    local fps = math.floor(1 / RunService.RenderStepped:Wait())
+    StatsLabel.Text = string.format("البينج: %d | الإطارات: %d", ping, fps)
+end)
 
--- تبديل القائمة
-local function ToggleUIVisibility()
-    MainFrame.Visible = not MainFrame.Visible
-    ToggleUI.Text = MainFrame.Visible and ArabicText.CloseUI or ArabicText.OpenUI
-end
-
--- أحداث الأزرار
-ToggleUI.MouseButton1Click:Connect(ToggleUIVisibility)
-
--- تحديث الأداء
-RunService.RenderStepped:Connect(UpdatePerformance)
-
--- إشعار التحميل
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = ArabicText.MainTitle,
-    Text = ArabicText.Loading,
-    Duration = 2
-})
-
-print("تم تحميل السكربت بنجاح - النسخة العربية المطورة")
+-- اختصار لوحة المفاتيح (Ctrl+H لإظهار/إخفاء القائمة)
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.H and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+        GUI.Enabled = not GUI.Enabled
+    end
+end)
