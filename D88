@@ -1,5 +1,5 @@
--- Ultimate Fruit Trade Controller v16.0 FINAL
--- النسخة النهائية الكاملة مع جميع الإصلاحات
+-- Ultimate Fruit Trade Controller v17.0 FINAL
+-- النسخة النهائية مع جميع الإصلاحات
 
 local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -13,7 +13,7 @@ local function SecureFunction(func)
         local args = {...}
         local success, result = pcall(func, unpack(args))
         if not success then
-            warn("خطأ في النظام:", result)
+            warn("حدث خطأ:", result)
         end
         return success, result
     end
@@ -26,8 +26,8 @@ GUI.ResetOnSpawn = false
 GUI.Parent = game:GetService("CoreGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 200)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -100)
+MainFrame.Size = UDim2.new(0, 300, 0, 250)
+MainFrame.Position = UDim2.new(1, -310, 0.5, -125) -- الجانب الأيمن
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.Active = true
 MainFrame.Parent = GUI
@@ -43,7 +43,7 @@ TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 TitleBar.Parent = MainFrame
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Text = " Ultimate Controller v16.0"
+TitleText.Text = " Ultimate Controller v17.0"
 TitleText.TextColor3 = Color3.fromRGB(200, 200, 200)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 TitleText.Size = UDim2.new(0.7, 0, 1, 0)
@@ -60,7 +60,7 @@ ContentFrame.Parent = MainFrame
 
 -- عناصر التحكم
 local PlayerBox = Instance.new("TextBox")
-PlayerBox.PlaceholderText = "اسم اللاعب (3+ أحرف)"
+PlayerBox.PlaceholderText = "اسم اللـاعـب (3+ أحرف)"
 PlayerBox.Size = UDim2.new(1, 0, 0, 30)
 PlayerBox.Position = UDim2.new(0, 0, 0, 10)
 PlayerBox.ClearTextOnFocus = false
@@ -73,19 +73,19 @@ ControlBtn.Position = UDim2.new(0, 0, 0, 50)
 ControlBtn.Parent = ContentFrame
 
 local JumpToggleHim = Instance.new("TextButton")
-JumpToggleHim.Text = "تعطيل القفز (له)"
+JumpToggleHim.Text = "تعطيل قفزه 🔒"
 JumpToggleHim.Size = UDim2.new(0.48, 0, 0, 35)
 JumpToggleHim.Position = UDim2.new(0, 0, 0, 95)
 JumpToggleHim.Parent = ContentFrame
 
 local JumpToggleMe = Instance.new("TextButton")
-JumpToggleMe.Text = "تعطيل القفز (لي)"
+JumpToggleMe.Text = "تعطيل قفزي 🔓"
 JumpToggleMe.Size = UDim2.new(0.48, 0, 0, 35)
 JumpToggleMe.Position = UDim2.new(0.52, 0, 0, 95)
 JumpToggleMe.Parent = ContentFrame
 
 local AcceptHimBtn = Instance.new("TextButton")
-AcceptHimBtn.Text = "قبول له"
+AcceptHimBtn.Text = "إجبار القبول ✅"
 AcceptHimBtn.Size = UDim2.new(1, 0, 0, 35)
 AcceptHimBtn.Position = UDim2.new(0, 0, 0, 140)
 AcceptHimBtn.Parent = ContentFrame
@@ -136,9 +136,11 @@ local ControlSystem = {
     ForceAcceptHim = SecureFunction(function()
         if not ControlledPlayer then return false end
         
+        -- نظام متقدم للقبول الإجباري
         local success = false
         for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
             if remote:IsA("RemoteEvent") and remote.Name:lower():find("accept") then
+                fireclickdetector(remote)
                 remote:FireServer(true)
                 success = true
             end
@@ -148,7 +150,9 @@ local ControlSystem = {
 }
 
 --[[ نظام السحب المتقدم ]]
-local dragging, dragStart, frameStart = false, nil, nil
+local dragging = false
+local dragStart = Vector2.new()
+local frameStart = Vector2.new()
 
 local function IsEmptySpace(mousePos)
     local absPos = MainFrame.AbsolutePosition
@@ -175,8 +179,8 @@ UIS.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if IsEmptySpace(input.Position) then
             dragging = true
-            dragStart = input.Position
-            frameStart = MainFrame.Position
+            dragStart = Vector2.new(input.Position.X, input.Position.Y)
+            frameStart = Vector2.new(MainFrame.Position.X.Offset, MainFrame.Position.Y.Offset)
             
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
@@ -189,13 +193,8 @@ end)
 
 UIS.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(
-            frameStart.X.Scale,
-            frameStart.X.Offset + delta.X,
-            frameStart.Y.Scale,
-            frameStart.Y.Offset + delta.Y
-        )
+        local delta = Vector2.new(input.Position.X, input.Position.Y) - dragStart
+        MainFrame.Position = UDim2.new(0, frameStart.X + delta.X, 0, frameStart.Y + delta.Y)
     end
 end)
 
@@ -209,6 +208,7 @@ ControlBtn.MouseButton1Click:Connect(function()
         ControlledPlayer = target
         PlayerBox.Text = target.Name
         ControlBtn.Text = "التحكم: "..target.Name
+        warn("تم التحكم في: "..target.Name)
     else
         warn("اللاعب غير موجود!")
     end
@@ -219,22 +219,22 @@ end)
 JumpToggleHim.MouseButton1Click:Connect(function()
     if not ControlledPlayer then return end
     
-    local newState = JumpToggleHim.Text == "تعطيل القفز (له)"
+    local newState = JumpToggleHim.Text:find("🔒")
     local success = ControlSystem.ToggleJump(ControlledPlayer, newState)
     
     if success then
-        JumpToggleHim.Text = newState and "تمكين القفز (له)" or "تعطيل القفز (له)"
+        JumpToggleHim.Text = newState and "تمكين قفزه 🔓" or "تعطيل قفزه 🔒"
     else
         warn("فشل في التحكم بقفز اللاعب!")
     end
 end)
 
 JumpToggleMe.MouseButton1Click:Connect(function()
-    local newState = JumpToggleMe.Text == "تعطيل القفز (لي)"
+    local newState = JumpToggleMe.Text:find("🔒")
     local success = ControlSystem.ToggleJump(Player, newState)
     
     if success then
-        JumpToggleMe.Text = newState and "تمكين القفز (لي)" or "تعطيل القفز (لي)"
+        JumpToggleMe.Text = newState and "تمكين قفزي 🔓" or "تعطيل قفزي 🔒"
     else
         warn("فشل في التحكم بقفزك!")
     end
@@ -243,9 +243,9 @@ end)
 AcceptHimBtn.MouseButton1Click:Connect(function()
     local success = ControlSystem.ForceAcceptHim()
     if success then
-        warn("تم إرسال طلب القبول للاعب!")
+        warn("تم إجبار اللاعب على القبول!")
     else
-        warn("فشل في إرسال الطلب!")
+        warn("فشل في إجبار القبول!")
     end
 end)
 
@@ -257,4 +257,4 @@ RS.Heartbeat:Connect(function()
     end
 end)
 
-warn("تم تحميل السكربت بنجاح!")
+warn("تم تحميل السكربت بنجاح! 🚀")
