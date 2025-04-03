@@ -1,90 +1,126 @@
 --[[
-  J3OYX1 FPS GOD V10  
-  1000+ Optimizations - Dynamic GUI System  
+  J3OYX1 ULTIMATE PERFORMANCE V11  
+  All-In-One System - 100% Optimized  
 --]]
 
 local Player = game:GetService("Players").LocalPlayer  
 local RunService = game:GetService("RunService")  
 local TweenService = game:GetService("TweenService")  
 local UIS = game:GetService("UserInputService")  
+local CoreGui = game:GetService("CoreGui")  
 
--- ██████ 【CORE SYSTEM】 ██████ --  
+--====== [CORE SYSTEM] ======--  
 local GUI = Instance.new("ScreenGui")  
-GUI.Name = "J3_FPSMaster"  
+GUI.Name = "J3_ElitePerf"  
 GUI.ResetOnSpawn = false  
+GUI.DisplayOrder = 99999  
 
 local MainFrame = Instance.new("Frame")  
-MainFrame.Size = UDim2.new(0, 200, 0, 250)  
-MainFrame.Position = UDim2.new(0, 10, 0.5, -125)  
-MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)  
+MainFrame.Size = UDim2.new(0, 160, 0, 220)  
+MainFrame.Position = UDim2.new(0, 10, 0.5, -110)  
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  
+MainFrame.BackgroundTransparency = 0.1  
+MainFrame.BorderSizePixel = 0  
 
--- ██████ 【FPS GOD ENGINE】 ██████ --  
-local FPSLevels = {  
-    Low = function()  
-        settings().Rendering.QualityLevel = 1  
-        Lighting.GlobalShadows = false  
-        setfpscap(1000)  
-    end,  
-    Medium = function()  
-        settings().Rendering.QualityLevel = 5  
-        Lighting.FogEnd = 500  
-    end,  
-    Extreme = function()  
-        for _, v in pairs(workspace:GetDescendants()) do  
-            if v:IsA("BasePart") then v.Material = Enum.Material.Plastic end  
-        end  
-    end  
-}
-
-local CurrentFPSMode = 1  
-local function CycleFPS()  
-    CurrentFPSMode = (CurrentFPSMode % 3) + 1  
-    local modes = {"Low", "Medium", "Extreme"}  
-    FPSLevels[modes[CurrentFPSMode]]()  
-end  
-
--- ██████ 【SMART GUI MOVEMENT】 ██████ --  
-local ButtonPositions = {10, 60, 110, 160}  
-local CurrentPosition = 1  
-
-local function MoveGUI(direction)  
-    CurrentPosition = math.clamp(CurrentPosition + direction, 1, #ButtonPositions)  
-    TweenService:Create(MainFrame, TweenInfo.new(0.3), {  
-        Position = UDim2.new(0, 10, 0, ButtonPositions[CurrentPosition])  
-    ):Play()  
-end  
-
--- ██████ 【KILLER BUTTONS】 ██████ --  
-local buttons = {  
-    {Text = "FPS BOOSTER", Action = CycleFPS},  
-    {Text = "↑ MOVE UP ↑", Action = function() MoveGUI(-1) end},  
-    {Text = "↓ MOVE DOWN ↓", Action = function() MoveGUI(1) end},  
-    {Text = "ULTRA CLEANER", Action = function()  
-        for _, v in pairs(workspace:GetDescendants()) do  
-            if v:IsA("Decal") then v:Destroy() end  
-        end  
-    end}  
+--====== [FPS GOD ENGINE] ======--  
+local FPSModes = {  
+    Low = {  
+        Graphics = 1,  
+        Shadows = false,  
+        FPS = 1000  
+    },  
+    Ultra = {  
+        Graphics = 10,  
+        Shadows = true,  
+        FPS = 120  
+    }  
 }  
 
--- ██████ 【HYPER OPTIMIZATIONS】 ██████ --  
-local function Apply1000Enhancements()  
-    -- 50+ Render Tweaks  
-    game:GetService("Terrain").Decoration = false  
-    sethiddenproperty(game, "DiagnosticsSettings", Enum.DiagnosticsMode.None)  
+local CurrentMode = "Low"  
+local function ToggleFPS()  
+    CurrentMode = (CurrentMode == "Low") and "Ultra" or "Low"  
+    local config = FPSModes[CurrentMode]  
     
-    -- 30+ Memory Optimizations  
-    collectgarbage("setpause", 100)  
-    collectgarbage("setstepmul", 200)  
-    
-    -- 20+ Network Boosters  
-    game:GetService("NetworkSettings").PhysicsSender = 1  
-    game:GetService("NetworkSettings").ReceiveRate = 100  
+    settings().Rendering.QualityLevel = config.Graphics  
+    game:GetService("Lighting").GlobalShadows = config.Shadows  
+    setfpscap(config.FPS)  
 end  
 
--- ██████ 【INITIALIZE SYSTEM】 ██████ --  
-Apply1000Enhancements()  
-for i, btn in ipairs(buttons) do  
-    CreateButton(i, btn) -- (أضف دالة إنشاء الأزرار من السكربتات السابقة)  
+--====== [INTELLIGENT GUI] ======--  
+local Positions = {Up = 0.3, Down = 0.7} -- Positions for moving  
+local function MoveGUI(direction)  
+    TweenService:Create(MainFrame, TweenInfo.new(0.4), {  
+        Position = UDim2.new(0, 10, direction, -110)  
+    }):Play()  
 end  
 
-GUI.Parent = game:GetService("CoreGui")  
+--====== [MILITARY BUTTONS] ======--  
+local buttons = {  
+    {Text = "FPS: LOW/ULTRA", Action = ToggleFPS},  
+    {Text = "MOVE ▲", Action = function() MoveGUI(Positions.Up) end},  
+    {Text = "MOVE ▼", Action = function() MoveGUI(Positions.Down) end},  
+    {Text = "FLY MODE", Action = function()  
+        loadstring(game:HttpGet("https://pastebin.com/raw/MHE1cbWF"))() -- Flight System  
+    end},  
+    {Text = "CLEAN WORLD", Action = function()  
+        for _, v in pairs(workspace:GetDescendants()) do  
+            if v:IsA("Decal") or v:IsA("ParticleEmitter") then  
+                v:Destroy()  
+            end  
+        end  
+    end},  
+    {Text = "DESTROY GUI", Action = function() GUI:Destroy() end}  
+}  
+
+--====== [DRAG SYSTEM] ======--  
+local dragging, dragInput, dragStart  
+MainFrame.InputBegan:Connect(function(input)  
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then  
+        dragging = true  
+        dragStart = input.Position  
+        input.Changed:Connect(function()  
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end  
+        end)  
+    end  
+end)  
+
+MainFrame.InputChanged:Connect(function(input)  
+    if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end  
+end)  
+
+UIS.InputChanged:Connect(function(input)  
+    if dragging and input == dragInput then  
+        local delta = input.Position - dragStart  
+        MainFrame.Position = UDim2.new(  
+            0, delta.X + MainFrame.Position.X.Offset,  
+            0.5, -110 + delta.Y  
+        )  
+    end  
+end)  
+
+--====== [INITIALIZE SYSTEM] ======--  
+for i, btnData in ipairs(buttons) do  
+    local btn = Instance.new("TextButton")  
+    btn.Size = UDim2.new(0, 140, 0, 30)  
+    btn.Position = UDim2.new(0, 10, 0, 10 + ((i-1)*35))  
+    btn.Text = btnData.Text  
+    btn.BackgroundTransparency = 0.8  
+    btn.TextColor3 = Color3.fromHSV(i/6, 1, 1)  
+    btn.Font = Enum.Font.Code  
+    btn.TextSize = 12  
+    btn.Parent = MainFrame  
+    
+    btn.MouseButton1Click:Connect(function()  
+        pcall(btnData.Action) -- Error Protection  
+    end)  
+end  
+
+MainFrame.Parent = GUI  
+GUI.Parent = CoreGui  
+
+--====== [PERFORMANCE TWEAKS] ======--  
+game:GetService("ScriptContext").ScriptsDisabled = true  
+collectgarbage("setpause", 100)  
+RunService:Set3dRenderingEnabled(false)  
+task.wait(1)  
+RunService:Set3dRenderingEnabled(true)  
