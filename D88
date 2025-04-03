@@ -1,96 +1,91 @@
--- D88 سكربت بواسطة j3oyx1
+--[[
+  D88 VIP - سكربت متطور لروبلكس
+  تم التطوير بواسطة: j3oyx1
+  مميزات إضافية: تقوية، إخفاء محسن، أزرار ذكية
+--]]
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
--- إنشاء الواجهة الرئيسية
+-- 🔒 إعدادات الحماية
+getgenv().SecureMode = false
+if not getgenv then getgenv = function() return _G end end
+
+-- 🎨 إنشاء واجهة متطورة
 local GUI = Instance.new("ScreenGui")
-GUI.Name = "D88"
+GUI.Name = "D88_VIP"
 GUI.ResetOnSpawn = false
 GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 120, 0, 35)
-MainFrame.Position = UDim2.new(0.5, -60, 1, -160)
-MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+MainFrame.Size = UDim2.new(0, 220, 0, 40)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 
 local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(1, 0, 0, 35)
-ToggleButton.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+ToggleButton.Size = UDim2.new(1, 0, 0, 40)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-ToggleButton.Text = "القائمة الرئيسية ▼"
+ToggleButton.Text = "D88 VIP ▼"
 ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 14
 
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Size = UDim2.new(1, 0, 0, 0)
-ContentFrame.Position = UDim2.new(0, 0, 0, 35)
-ContentFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ContentFrame.ClipsDescendants = true
 
--- الإحصائيات والاعتمادات
-local StatsLabel = Instance.new("TextLabel")
-StatsLabel.Size = UDim2.new(1, 0, 0, 30)
-StatsLabel.BackgroundTransparency = 1
-StatsLabel.TextColor3 = Color3.new(1, 1, 1)
-StatsLabel.Text = "البينج: -- | الإطارات: --"
-StatsLabel.Font = Enum.Font.Gotham
+-- 📊 إحصائيات الأداء
+local StatsFrame = Instance.new("Frame")
+StatsFrame.Size = UDim2.new(1, 0, 0, 30)
+StatsFrame.Position = UDim2.new(0, 0, 1, -30)
+StatsFrame.BackgroundTransparency = 1
 
-local CreditLabel = Instance.new("TextLabel")
-CreditLabel.Size = UDim2.new(1, 0, 0, 20)
-CreditLabel.Position = UDim2.new(0, 0, 1, -20)
-CreditLabel.BackgroundTransparency = 1
-CreditLabel.TextColor3 = Color3.new(1, 1, 1)
-CreditLabel.Text = "تم التطوير بواسطة j3oyx1"
-CreditLabel.Font = Enum.Font.Gotham
+local PingLabel = Instance.new("TextLabel")
+PingLabel.Size = UDim2.new(0.5, -5, 1, 0)
+PingLabel.Position = UDim2.new(0, 5, 0, 0)
+PingLabel.BackgroundTransparency = 1
+PingLabel.TextColor3 = Color3.new(1, 1, 1)
+PingLabel.Text = "بينج: --"
+PingLabel.Font = Enum.Font.Gotham
+PingLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- إعدادات التخزين
-local HiddenParts = {}
-local HiddenPlayers = {}
+local FPSLabel = Instance.new("TextLabel")
+FPSLabel.Size = UDim2.new(0.5, -5, 1, 0)
+FPSLabel.Position = UDim2.new(0.5, 5, 0, 0)
+FPSLabel.BackgroundTransparency = 1
+FPSLabel.TextColor3 = Color3.new(1, 1, 1)
+FPSLabel.Text = "إطارات: --"
+FPSLabel.Font = Enum.Font.Gotham
+FPSLabel.TextXAlignment = Enum.TextXAlignment.Right
 
--- الأزرار المخصصة
+-- 🛠️ نظام الأزرار المحسن
 local Buttons = {
     {"إخفاء البلوكات", function()
         for _, part in ipairs(workspace:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name == "Block" then
-                if part.Transparency == 1 then
-                    part.Transparency = 0
-                else
-                    part.Transparency = 1
-                    table.insert(HiddenParts, part)
-                end
+            if part:IsA("BasePart") and not part.Parent:FindFirstChildOfClass("Humanoid") then
+                part.Transparency = part.Transparency == 1 and 0 or 1
             end
         end
-    end},
+    end, Color3.fromRGB(200, 50, 50)},
     
     {"إخفاء اللاعبين", function()
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character then
-                local char = player.Character
-                if char:FindFirstChild("HumanoidRootPart") then
-                    if char.HumanoidRootPart.Transparency == 1 then
-                        char.HumanoidRootPart.Transparency = 0
-                    else
-                        char.HumanoidRootPart.Transparency = 1
-                        table.insert(HiddenPlayers, char)
+                for _, v in ipairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.LocalTransparencyModifier = v.LocalTransparencyModifier == 1 and 0 or 1
                     end
                 end
             end
         end
-    end},
-    
-    {"إخفاء القائمة", function()
-        GUI.Enabled = not GUI.Enabled
-    end},
-    
-    {"إخفاء الكل", function()
-        -- تفعيل جميع إخفاءات
-        fireclickdetector(ToggleButton)
-        Buttons[1][2]()
-        Buttons[2][2]()
-    end},
+    end, Color3.fromRGB(50, 150, 200)},
     
     {"وضع AFK", function()
         LocalPlayer.Idled:Connect(function()
@@ -98,44 +93,89 @@ local Buttons = {
             task.wait(1)
             game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
         end)
-    end}
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "وضع AFK",
+            Text = "تم تفعيل وضع AFK الآمن",
+            Duration = 3
+        })
+    end, Color3.fromRGB(100, 200, 100)},
+    
+    {"تقوية السرعة", function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = LocalPlayer.Character.Humanoid.WalkSpeed == 16 and 50 or 16
+        end
+    end, Color3.fromRGB(200, 200, 50)},
+    
+    {"تقوية القفز", function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.JumpPower = LocalPlayer.Character.Humanoid.JumpPower == 50 and 100 or 50
+        end
+    end, Color3.fromRGB(150, 50, 200)},
+    
+    {"إخفاء القائمة", function()
+        GUI.Enabled = not GUI.Enabled
+    end, Color3.fromRGB(100, 100, 100)}
 }
 
--- نظام إنشاء الأزرار
-local function CreateButton(text, callback)
+-- 🎯 إنشاء الأزرار الذكية
+local function CreateButton(text, callback, color)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 35)
     btn.Position = UDim2.new(0, 5, 0, 0)
-    btn.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    btn.BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = text
     btn.Font = Enum.Font.Gotham
-    btn.MouseButton1Click:Connect(callback)
+    btn.TextSize = 12
+    btn.AutoButtonColor = false
+    
+    btn.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)}):Play()
+    end)
+    
+    btn.MouseButton1Click:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
+        task.wait(0.1)
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)}):Play()
+        callback()
+    end)
+    
     return btn
 end
 
--- بناء الواجهة
+-- 🏗️ بناء الواجهة
 ToggleButton.Parent = MainFrame
 ContentFrame.Parent = MainFrame
-StatsLabel.Parent = ContentFrame
-CreditLabel.Parent = ContentFrame
+StatsFrame.Parent = ContentFrame
+PingLabel.Parent = StatsFrame
+FPSLabel.Parent = StatsFrame
 
 local ButtonLayout = Instance.new("UIListLayout")
 ButtonLayout.Padding = UDim.new(0, 5)
 ButtonLayout.Parent = ContentFrame
 
 for _, btnData in ipairs(Buttons) do
-    CreateButton(btnData[1], btnData[2]).Parent = ContentFrame
+    CreateButton(btnData[1], btnData[2], btnData[3]).Parent = ContentFrame
 end
 
 MainFrame.Parent = GUI
 GUI.Parent = game:GetService("CoreGui")
 
--- نظام السحب والإفلات
+-- ✨ نظام السحب المحسن
 local dragging, dragInput, dragStart, startPos
 
+local function UpdateInput(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end
+
 MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
@@ -149,7 +189,7 @@ MainFrame.InputBegan:Connect(function(input)
 end)
 
 MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
@@ -166,24 +206,25 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- نظام التوسيع والطي
+-- 🔄 نظام التوسيع/الطي
 local isExpanded = false
 ToggleButton.MouseButton1Click:Connect(function()
     isExpanded = not isExpanded
-    ContentFrame.Size = UDim2.new(1, 0, 0, isExpanded and 250 or 0)
-    ToggleButton.Text = isExpanded and "القائمة الرئيسية ▲" or "القائمة الرئيسية ▼"
+    ContentFrame.Size = UDim2.new(1, 0, 0, isExpanded and (#Buttons * 40 + 35) or 0)
+    ToggleButton.Text = isExpanded and "D88 VIP ▲" or "D88 VIP ▼"
 end)
 
--- نظام مراقبة الأداء
+-- 📈 نظام مراقبة الأداء
 RunService.Heartbeat:Connect(function()
     local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
     local fps = math.floor(1 / RunService.RenderStepped:Wait())
-    StatsLabel.Text = string.format("البينج: %d | الإطارات: %d", ping, fps)
+    PingLabel.Text = "بينج: "..ping
+    FPSLabel.Text = "إطارات: "..fps
 end)
 
--- اختصار لوحة المفاتيح (Ctrl+H لإظهار/إخفاء القائمة)
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.H and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-        GUI.Enabled = not GUI.Enabled
-    end
-end)
+-- 🎁 إشعار البدء
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "D88 VIP",
+    Text = "تم تحميل السكربت بنجاح!",
+    Duration = 5
+})
