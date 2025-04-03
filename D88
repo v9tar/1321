@@ -1,209 +1,256 @@
 --[[
-  سكربت D88 الإحترافي - الإصدار النهائي
-  المميزات:
-  1. دعم متعدد اللغات (اختيار عند التشغيل)
-  2. عرض FPS و Ping مباشرة
-  3. واجهة قابلة للسحب مع زر ذكي
-  4. تحكم كامل في المابات
-  5. نظام تبرعات مدمج
+    سكربت D88 الإحترافي - النسخة الخفيفة
+    المميزات:
+    1. حجم مضغوط 40% أصغر من السابق
+    2. زر AFK مدمج
+    3. وضع توفير FPS (إخفاء العناصر)
+    4. تحسينات أداء عالية
+    5. دعم كافة الأجهزة
 ]]
 
--- خدمات اللعبة
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local TweenService = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService = game:GetService("UserInputService")
 
--- إعدادات اللغة
-local Languages = {
-    ["العربية"] = {
-        Title = "D88 - التحكم الشامل",
-        MapControl = "التحكم في المابات",
-        DonateTitle = "ادعم التطوير",
-        Donate5 = "تبرع 5 💙",
-        Donate10 = "تبرع 10 💎",
-        CloseUI = "▲ إغلاق ▲",
-        OpenUI = "▼ فتح ▼"
-    },
-    ["English"] = {
-        Title = "D88 - Ultimate Control",
-        MapControl = "Map Control",
-        DonateTitle = "Support Development",
-        Donate5 = "Donate 5 💙",
-        Donate10 = "Donate 10 💎",
-        CloseUI = "▲ Close ▲",
-        OpenUI = "▼ Open ▼"
-    },
-    ["Español"] = {
-        Title = "D88 - Control Total",
-        MapControl = "Control de Mapas",
-        DonateTitle = "Apoya el Desarrollo",
-        Donate5 = "Donar 5 💙",
-        Donate10 = "Donar 10 💎",
-        CloseUI = "▲ Cerrar ▲",
-        OpenUI = "▼ Abrir ▼"
-    }
+-- إعدادات الواجهة (مضغوطة 40%) --
+local GUI_SETTINGS = {
+    Size = UDim2.new(0, 200, 0, 270),
+    Position = UDim2.new(0.5, -100, 0.5, -135),
+    BackgroundTransparency = 0.1,
+    Color = Color3.fromRGB(20, 25, 35)
 }
 
--- اختيار اللغة عند التشغيل
-local function SelectLanguage()
-    local selected
-    for langName, _ in pairs(Languages) do
-        if not selected then
-            selected = langName
-        end
-    end
-    return Languages[selected] or Languages["العربية"]
-end
+-- النصوص العربية --
+local ARABIC_TEXTS = {
+    Title = "D88 الخفيف",
+    MapControl = "تحكم الخرائط",
+    DonateTitle = "دعم المطور",
+    Donate5 = "5 💎",
+    Donate10 = "10 💖",
+    CloseUI = "إغلاق ▲",
+    OpenUI = "فتح ▼",
+    FPS = "FPS: ",
+    Ping = "Ping: ",
+    AFK = "وضع AFK",
+    BoostFPS = "تعزيز FPS"
+}
 
-local L = SelectLanguage()
-
--- إنشاء واجهة متطورة
-local Gui = Instance.new("ScreenGui")
-Gui.Name = "D88_Ultimate"
-Gui.Parent = game:GetService("CoreGui")
+-- إنشاء الواجهة الرئيسية --
+local D88UI = Instance.new("ScreenGui")
+D88UI.Name = "D88_Light"
+D88UI.ResetOnSpawn = false
+D88UI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+D88UI.Parent = game:GetService("CoreGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = Gui
-MainFrame.Size = UDim2.new(0, 350, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
-MainFrame.BackgroundTransparency = 0.1
-MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.Size = GUI_SETTINGS.Size
+MainFrame.Position = GUI_SETTINGS.Position
+MainFrame.BackgroundColor3 = GUI_SETTINGS.Color
+MainFrame.BackgroundTransparency = GUI_SETTINGS.BackgroundTransparency
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Parent = D88UI
 
--- تصميم الواجهة
+-- تحسينات الشكل --
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.CornerRadius = UDim.new(0, 6)
 UICorner.Parent = MainFrame
 
-local Title = Instance.new("TextLabel")
-Title.Text = L.Title
-Title.Size = UDim2.new(0, 300, 0, 50)
-Title.Position = UDim2.new(0.5, -150, 0, 10)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBlack
-Title.BackgroundTransparency = 1
-Title.TextSize = 20
-Title.Parent = MainFrame
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 1
+UIStroke.Color = Color3.fromRGB(100, 150, 255)
+UIStroke.Parent = MainFrame
 
--- أزرار التحكم
-local MapControlBtn = Instance.new("TextButton")
-MapControlBtn.Text = L.MapControl
-MapControlBtn.Size = UDim2.new(0, 300, 0, 60)
-MapControlBtn.Position = UDim2.new(0.5, -150, 0.2, 0)
-MapControlBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-MapControlBtn.TextColor3 = Color3.new(1, 1, 1)
-MapControlBtn.Font = Enum.Font.GothamBold
-MapControlBtn.TextSize = 16
-MapControlBtn.Parent = MainFrame
-
--- قسم التبرعات
-local DonateLabel = Instance.new("TextLabel")
-DonateLabel.Text = L.DonateTitle
-DonateLabel.Size = UDim2.new(0, 300, 0, 30)
-DonateLabel.Position = UDim2.new(0.5, -150, 0.6, 0)
-DonateLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-DonateLabel.Font = Enum.Font.Gotham
-DonateLabel.BackgroundTransparency = 1
-DonateLabel.TextSize = 14
-DonateLabel.Parent = MainFrame
-
-local Donate5Btn = Instance.new("TextButton")
-Donate5Btn.Text = L.Donate5
-Donate5Btn.Size = UDim2.new(0, 140, 0, 50)
-Donate5Btn.Position = UDim2.new(0.3, -70, 0.7, 0)
-Donate5Btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-Donate5Btn.TextColor3 = Color3.new(1, 1, 1)
-Donate5Btn.Font = Enum.Font.GothamBold
-Donate5Btn.Parent = MainFrame
-
-local Donate10Btn = Instance.new("TextButton")
-Donate10Btn.Text = L.Donate10
-Donate10Btn.Size = UDim2.new(0, 140, 0, 50)
-Donate10Btn.Position = UDim2.new(0.7, -70, 0.7, 0)
-Donate10Btn.BackgroundColor3 = Color3.fromRGB(150, 0, 255)
-Donate10Btn.TextColor3 = Color3.new(1, 1, 1)
-Donate10Btn.Font = Enum.Font.GothamBold
-Donate10Btn.Parent = MainFrame
-
--- قسم مراقبة الأداء
-local PerformanceFrame = Instance.new("Frame")
-PerformanceFrame.Size = UDim2.new(0, 300, 0, 80)
-PerformanceFrame.Position = UDim2.new(0.5, -150, 0.85, 0)
-PerformanceFrame.BackgroundTransparency = 1
-PerformanceFrame.Parent = MainFrame
-
-local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Text = "FPS: 0"
-FPSLabel.Size = UDim2.new(0, 140, 0, 30)
-FPSLabel.Position = UDim2.new(0, 0, 0, 0)
-FPSLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-FPSLabel.Font = Enum.Font.GothamBold
-FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextXAlignment = Enum.TextXAlignment.Left
-FPSLabel.Parent = PerformanceFrame
-
-local PingLabel = Instance.new("TextLabel")
-PingLabel.Text = "Ping: 0ms"
-PingLabel.Size = UDim2.new(0, 140, 0, 30)
-PingLabel.Position = UDim2.new(0, 160, 0, 0)
-PingLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-PingLabel.Font = Enum.Font.GothamBold
-PingLabel.BackgroundTransparency = 1
-PingLabel.TextXAlignment = Enum.TextXAlignment.Left
-PingLabel.Parent = PerformanceFrame
-
--- زر تبديل الواجهة الذكي
-local ToggleUI = Instance.new("TextButton")
-ToggleUI.Name = "ToggleUI"
-ToggleUI.Size = UDim2.new(0, 100, 0, 40)
-ToggleUI.Position = UDim2.new(0.5, -50, 1, -50)
-ToggleUI.Text = L.CloseUI
-ToggleUI.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-ToggleUI.TextColor3 = Color3.new(1, 1, 1)
-ToggleUI.Font = Enum.Font.GothamBold
-ToggleUI.Parent = Gui
-
--- تحديث أداء اللعبة
-local function UpdatePerformance()
-    local fps = math.floor(1 / RunService.RenderStepped:Wait())
-    local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-    
-    FPSLabel.Text = "FPS: " .. fps
-    PingLabel.Text = "Ping: " .. ping .. "ms"
-    
-    -- تغيير لون FPS حسب الأداء
-    if fps < 30 then
-        FPSLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-    elseif fps < 60 then
-        FPSLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
-    else
-        FPSLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+-- العناصر الرئيسية --
+local function CreateElement(type, props)
+    local element = Instance.new(type)
+    for prop, value in pairs(props) do
+        element[prop] = value
     end
-    
-    -- تغيير لون Ping حسب الأداء
-    if ping > 300 then
-        PingLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-    elseif ping > 150 then
-        PingLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
-    else
-        PingLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-    end
+    return element
 end
 
--- تبديل إظهار/إخفاء الواجهة
-local function ToggleUIVisibility()
-    UIVisible = not UIVisible
-    MainFrame.Visible = UIVisible
-    ToggleUI.Text = UIVisible and L.CloseUI or L.OpenUI
+-- العنوان --
+local Title = CreateElement("TextLabel", {
+    Text = ARABIC_TEXTS.Title,
+    Size = UDim2.new(0.9, 0, 0, 25),
+    Position = UDim2.new(0.05, 0, 0.02, 0),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBlack,
+    TextSize = 14,
+    BackgroundTransparency = 1,
+    Parent = MainFrame
+})
+
+-- أزرار التحكم الأساسية --
+local MapButton = CreateElement("TextButton", {
+    Text = ARABIC_TEXTS.MapControl,
+    Size = UDim2.new(0.9, 0, 0, 30),
+    Position = UDim2.new(0.05, 0, 0.15, 0),
+    BackgroundColor3 = Color3.fromRGB(0, 120, 180),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    Parent = MainFrame
+})
+
+-- زر AFK --
+local AFKButton = CreateElement("TextButton", {
+    Text = ARABIC_TEXTS.AFK,
+    Size = UDim2.new(0.44, 0, 0, 30),
+    Position = UDim2.new(0.05, 0, 0.3, 0),
+    BackgroundColor3 = Color3.fromRGB(80, 80, 120),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    Parent = MainFrame
+})
+
+-- زر تعزيز FPS --
+local FPSBoostButton = CreateElement("TextButton", {
+    Text = ARABIC_TEXTS.BoostFPS,
+    Size = UDim2.new(0.44, 0, 0, 30),
+    Position = UDim2.new(0.51, 0, 0.3, 0),
+    BackgroundColor3 = Color3.fromRGB(120, 0, 200),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    Parent = MainFrame
+})
+
+-- نظام التبرعات المدمج --
+local DonateFrame = CreateElement("Frame", {
+    Size = UDim2.new(0.9, 0, 0, 60),
+    Position = UDim2.new(0.05, 0, 0.45, 0),
+    BackgroundTransparency = 1,
+    Parent = MainFrame
+})
+
+CreateElement("TextLabel", {
+    Text = ARABIC_TEXTS.DonateTitle,
+    Size = UDim2.new(1, 0, 0, 20),
+    TextColor3 = Color3.fromRGB(180, 180, 180),
+    Font = Enum.Font.Gotham,
+    TextSize = 12,
+    BackgroundTransparency = 1,
+    Parent = DonateFrame
+})
+
+local Donate5Button = CreateElement("TextButton", {
+    Text = ARABIC_TEXTS.Donate5,
+    Size = UDim2.new(0.48, 0, 0, 30),
+    Position = UDim2.new(0, 0, 0.5, 0),
+    BackgroundColor3 = Color3.fromRGB(0, 150, 70),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    Parent = DonateFrame
+})
+
+local Donate10Button = CreateElement("TextButton", {
+    Text = ARABIC_TEXTS.Donate10,
+    Size = UDim2.new(0.48, 0, 0, 30),
+    Position = UDim2.new(0.52, 0, 0.5, 0),
+    BackgroundColor3 = Color3.fromRGB(140, 0, 220),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    Parent = DonateFrame
+})
+
+-- نظام مراقبة الأداء --
+local PerformanceFrame = CreateElement("Frame", {
+    Size = UDim2.new(0.9, 0, 0, 40),
+    Position = UDim2.new(0.05, 0, 0.7, 0),
+    BackgroundTransparency = 1,
+    Parent = MainFrame
+})
+
+local FPSLabel = CreateElement("TextLabel", {
+    Text = ARABIC_TEXTS.FPS .. "0",
+    Size = UDim2.new(0.45, 0, 0, 20),
+    TextColor3 = Color3.new(0.5, 1, 0.5),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    BackgroundTransparency = 1,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    Parent = PerformanceFrame
+})
+
+local PingLabel = CreateElement("TextLabel", {
+    Text = ARABIC_TEXTS.Ping .. "0ms",
+    Size = UDim2.new(0.45, 0, 0, 20),
+    Position = UDim2.new(0.55, 0, 0, 0),
+    TextColor3 = Color3.new(0.5, 0.8, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 12,
+    BackgroundTransparency = 1,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    Parent = PerformanceFrame
+})
+
+-- زر التبديل الذكي --
+local ToggleButton = CreateElement("TextButton", {
+    Text = ARABIC_TEXTS.CloseUI,
+    Size = UDim2.new(0, 100, 0, 25),
+    Position = UDim2.new(0.5, -50, 1, -30),
+    BackgroundColor3 = Color3.fromRGB(40, 45, 60),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamBold,
+    TextSize = 11,
+    Parent = D88UI
+})
+
+-- نظام السحب المحسن --
+local dragging, dragInput, dragStart, startPos
+
+local function UpdateInput(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    ToggleButton.Position = UDim2.new(0.5, -50, 1, -30) + UDim2.new(0, delta.X, 0, delta.Y)
 end
 
--- أحداث الأزرار
-ToggleUI.MouseButton1Click:Connect(ToggleUIVisibility)
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
 
--- تحديث الأداء بانتظام
-RunService.RenderStepped:Connect(UpdatePerformance)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        UpdateInput(input)
+    end
+end)
 
-print("تم تحميل سكربت D88 النهائي بنجاح!")
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- نظام التبرعات --
+local GAMEPASS_IDS = {
+    Donate5 = 1013443613
+    Donate10 = 1013691424
+}
+
+local function HandleDonation(gamepassId)
+    MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassId)
+end
+
+Donate5Button.MouseButton1Click:Connect(function()
+    HandleDonation(GAMEPASS_IDS.Donate5)
+end)
+
+Donate10Button.MouseButton1Click:Connect(function()
+    HandleDonation(GAMEPASS_IDS.Donate10)
+end)
+
+-- نظام AFK --
+local AFKMode = false
+AFKButton.MouseButton1Click:Connect(function()
+    AFKMode = not AFKMode
+    AFKButton.BackgroundColor3 = AFKMode and Color3.fromRGB(120, 120, 180) or
